@@ -2,17 +2,17 @@
 
 > Updated at the end of every chapter. Progress is measured in completed chapters, not lines of code.
 
-**Current version:** `v0.1.0` · **Progress:** 1 / 18 chapters (5.6%) · **Current phase:** Foundations
+**Current version:** `v0.2.0` · **Progress:** 2 / 18 chapters (11.1%) · **Current phase:** Foundations
 
 ```
-Part I   Foundations        ██░░░░░░░░░░░░░░░░░░  1/4
+Part I   Foundations        ██████████░░░░░░░░░░  2/4
 Part II  Publish path       ░░░░░░░░░░░░░░░░░░░░  0/3
 Part III Consume path       ░░░░░░░░░░░░░░░░░░░░  0/2
 Part IV  Failure handling   ░░░░░░░░░░░░░░░░░░░░  0/2
 Part V   Advanced patterns  ░░░░░░░░░░░░░░░░░░░░  0/4
 Part VI  Production         ░░░░░░░░░░░░░░░░░░░░  0/3
 ─────────────────────────────────────────────────────
-Overall                     █░░░░░░░░░░░░░░░░░░░  1/18  (5.6%)
+Overall                     ██░░░░░░░░░░░░░░░░░░  2/18  (11.1%)
 ```
 
 ---
@@ -22,7 +22,7 @@ Overall                     █░░░░░░░░░░░░░░░░�
 | # | Chapter | Version | Status | Phase | Commits |
 |---|---|---|---|---|---|
 | **0** | **Architecture & Design Decisions** | `v0.1.0` | ✅ **Complete** | — | 4 |
-| 1 | Infrastructure Foundation | `v0.2.0` | ⬜ Not started | Phase 1a | — |
+| **1** | **Infrastructure Foundation** | `v0.2.0` | ✅ **Complete** | Phase 1a | 3 |
 | 2 | Shared Core Library | `v0.3.0` | ⬜ Not started | — | — |
 | 3 | Data Layer (Postgres + Redis) | `v0.4.0` | ⬜ Not started | — | — |
 | 4 | Producer Service | `v0.5.0` | ⬜ Not started | Phase 1b | — |
@@ -107,5 +107,6 @@ Shortcut: `pnpm verify` runs the first four.
 | Version | Chapter | Milestone |
 |---|---|---|
 | `v0.1.0` | 0 | Project initialisation, architecture and ADRs |
+| `v0.2.0` | 1 | 3-broker KRaft cluster, declarative topics, cluster verification |
 
 Target: **`v1.0.0`** at Chapter 17 — production-ready release.

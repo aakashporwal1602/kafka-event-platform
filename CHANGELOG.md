@@ -14,6 +14,53 @@ _Nothing yet._
 
 ---
 
+## [0.2.0] — 2026-08-02
+
+**Chapter 1 — Infrastructure Foundation**
+
+### Added
+
+- **Local infrastructure stack** (`infra/docker/docker-compose.yml`)
+  - 3-broker Kafka cluster in KRaft mode, combined broker/controller roles
+  - Durability defaults enforced cluster-wide: `RF=3`, `min.insync.replicas=2`,
+    `unclean.leader.election.enable=false`
+  - Separate INTERNAL / EXTERNAL / CONTROLLER listeners so both containers and the
+    host connect correctly
+  - `auto.create.topics.enable=false` — topics are provisioned declaratively
+  - PostgreSQL 16 with `wal_level=logical` (pre-enabled for Chapter 11 CDC)
+  - Redis 7 with AOF persistence and `allkeys-lru` eviction
+  - Prometheus, Grafana, Jaeger, Kafka UI and kafka-exporter
+  - Health checks with dependency ordering on every service
+- **Declarative topic provisioning** (`tools/`)
+  - `topics.config.ts` — desired cluster state in version control; `eventDomain()`
+    expands one domain into main topic, four retry tiers and a DLQ
+  - `bootstrap-topics.ts` — idempotent reconciler with `--dry-run` and `--prune`;
+    increases partitions but never decreases, reports unmanaged topics but never deletes
+  - `verify-cluster.ts` — asserts broker count, controller election, partition counts,
+    replication factor, `min.insync.replicas`, ISR health and leadership balance
+- **Kafka topology documentation** (`docs/hld/02-kafka-topology.md`)
+  - Listener model and why bootstrap-succeeds-but-produce-times-out happens
+  - Partition sizing arithmetic and why 12 rather than 30
+  - ISR mechanics, the RF/minISR/acks interaction, and a failure-scenario table
+  - Six interview questions with answers
+- **Alerting rules** (`infra/prometheus/rules/kafka-alerts.yml`) — under-replicated
+  partitions, broker down, consumer lag, stalled consumers, DLQ growth, retry saturation;
+  every alert carries a runbook link
+- **Grafana provisioning** — datasources and dashboard provider as code
+- **Test infrastructure** — Vitest with separate `unit` and `integration` projects
+- `tools/topics.config.test.ts` — 17 tests asserting durability invariants, naming
+  convention, and that every `events.*` topic has matching retry tiers and a DLQ
+- `Makefile` with a self-documenting `help` target
+- `.env.example` covering every service
+
+### Changed
+
+- Root `package.json` — topic and cluster scripts delegate to the `@platform/tools` workspace
+
+[0.2.0]: https://github.com/aakashporwal1602/kafka-event-platform/compare/v0.1.0...v0.2.0
+
+---
+
 ## [0.1.0] — 2026-08-02
 
 **Chapter 0 — Architecture & Design Decisions**
