@@ -1,0 +1,9 @@
+{
+  // Solution-style root config: owns no files itself, only references the
+  // workspace projects. `tsc -b` walks these in dependency order and rebuilds
+  // only what changed downstream.
+  //
+  // Every new package/app adds a reference here.
+  "files": [],
+  "references": [{ "path": "./tools" }]
+}

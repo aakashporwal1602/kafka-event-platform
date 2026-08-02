@@ -20,8 +20,6 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:unit": "vitest run --project unit",
-    "test:integration": "vitest run --project integration",
     "test:coverage": "vitest run --coverage",
     "infra:up": "docker compose -f infra/docker/docker-compose.yml up -d",
     "infra:down": "docker compose -f infra/docker/docker-compose.yml down",

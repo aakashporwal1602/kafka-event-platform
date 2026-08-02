@@ -1,35 +1,21 @@
 import { defineConfig } from 'vitest/config';
 
 /**
- * Two projects, separated because they have very different runtimes:
+ * Unit tests only — pure logic, no I/O, milliseconds. Runs on every save.
  *
- *   unit        — pure logic, no I/O, milliseconds. Runs on every save.
- *   integration — Testcontainers-backed against real Kafka/Postgres/Redis.
- *                 Slow, so it runs on demand and in CI, not on save.
+ * Integration tests live in tests/integration/ and are Testcontainers-backed
+ * against real Kafka/Postgres/Redis. They are slow, so they get their own
+ * config (vitest.integration.config.ts, added in Chapter 3 alongside the first
+ * real repositories) and run on demand and in CI, not on save.
  */
 export default defineConfig({
   test: {
+    name: 'unit',
     globals: false, // explicit imports; no ambient magic
+    environment: 'node',
     passWithNoTests: true,
-    projects: [
-      {
-        test: {
-          name: 'unit',
-          include: ['{apps,packages,tools}/**/*.test.ts'],
-          exclude: ['**/node_modules/**', '**/dist/**'],
-          environment: 'node',
-        },
-      },
-      {
-        test: {
-          name: 'integration',
-          include: ['tests/integration/**/*.test.ts'],
-          environment: 'node',
-          testTimeout: 120_000, // container startup
-          hookTimeout: 120_000,
-        },
-      },
-    ],
+    include: ['{apps,packages,tools}/**/*.test.ts'],
+    exclude: ['**/node_modules/**', '**/dist/**', 'tests/integration/**'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov'],
@@ -38,7 +24,9 @@ export default defineConfig({
         '**/dist/**',
         '**/*.test.ts',
         '**/*.config.ts',
-        'tools/bootstrap-topics.ts', // thin CLI over kafkajs admin; covered by integration
+        // Thin CLI wrappers over the kafkajs admin client — meaningfully
+        // covered by integration tests against a real broker, not by mocks.
+        'tools/bootstrap-topics.ts',
         'tools/verify-cluster.ts',
       ],
     },

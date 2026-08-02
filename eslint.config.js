@@ -13,7 +13,12 @@ export default tseslint.config(
   {
     languageOptions: {
       parserOptions: {
-        projectService: true,
+        projectService: {
+          // Root-level config files belong to no workspace project. Without
+          // this, type-aware linting errors with "file not found in any
+          // tsconfig" on the very files that configure the tooling.
+          allowDefaultProject: ['eslint.config.js', 'vitest.config.ts'],
+        },
         tsconfigRootDir: import.meta.dirname,
       },
     },
