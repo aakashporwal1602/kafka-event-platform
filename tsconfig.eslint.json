@@ -1,0 +1,22 @@
+{
+  // Type-aware linting needs EVERY file in a project, including tests and
+  // build configs. The per-package tsconfigs deliberately exclude tests so
+  // they are not emitted into dist, which leaves those files invisible to
+  // ESLint's project service.
+  //
+  // Rather than weakening the build configs, linting gets its own project:
+  // same strict compiler options, wider include, and noEmit so it can never
+  // produce output. composite is off because this project is not part of the
+  // build graph — `tsc -b` never sees it.
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "incremental": false,
+    "types": ["node"]
+  },
+  "include": ["**/*.ts", "**/*.js", "**/*.mjs"],
+  "exclude": ["node_modules", "**/node_modules", "**/dist", "coverage"]
+}

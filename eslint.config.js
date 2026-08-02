@@ -13,14 +13,17 @@ export default tseslint.config(
   {
     languageOptions: {
       parserOptions: {
-        projectService: {
-          // Root-level config files belong to no workspace tsconfig. This lets
-          // the parser handle them via an inferred project. Note that inferred
-          // projects use TypeScript's DEFAULT compiler options — no
-          // strictNullChecks — so type-aware rules are switched off for these
-          // files further down rather than run against a weaker type model.
-          allowDefaultProject: ['eslint.config.js', 'vitest.config.ts'],
-        },
+        // An explicit lint project rather than projectService.
+        //
+        // projectService discovers the nearest tsconfig per file, which fails
+        // for anything a build config excludes — every *.test.ts, since those
+        // are excluded so they are not emitted into dist. Its allowDefaultProject
+        // escape hatch is not a fix: inferred projects use TypeScript's DEFAULT
+        // compiler options, so strictNullChecks is off and half the type-aware
+        // rules either misfire or refuse to run.
+        //
+        // tsconfig.eslint.json covers every file with our real strict options.
+        project: ['./tsconfig.eslint.json'],
         tsconfigRootDir: import.meta.dirname,
       },
     },
