@@ -1,0 +1,37 @@
+{
+  "name": "@platform/persistence",
+  "version": "0.4.0",
+  "private": true,
+  "type": "module",
+  "description": "PostgreSQL and Redis access — migrations, repositories, unit of work, key design",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "migrations"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "rm -rf dist *.tsbuildinfo",
+    "migrate": "tsx src/cli.ts migrate",
+    "migrate:status": "tsx src/cli.ts status"
+  },
+  "dependencies": {
+    "@platform/core": "workspace:*",
+    "ioredis": "^5.4.1",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.5",
+    "@types/pg": "^8.11.10",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.3"
+  }
+}
