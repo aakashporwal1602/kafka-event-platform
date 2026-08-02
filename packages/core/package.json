@@ -1,0 +1,31 @@
+{
+  "name": "@platform/core",
+  "version": "0.3.0",
+  "private": true,
+  "type": "module",
+  "description": "Cross-cutting primitives: Result, error taxonomy, DI container, config, context propagation, lifecycle",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "rm -rf dist *.tsbuildinfo"
+  },
+  "dependencies": {
+    "pino": "^9.5.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.5",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.3"
+  }
+}
