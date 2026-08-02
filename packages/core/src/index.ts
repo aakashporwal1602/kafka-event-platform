@@ -65,3 +65,37 @@ export {
   type Lifetime,
   type Token,
 } from './container.js';
+
+export { FixedClock, SleepAbortedError, SystemClock, type Clock } from './clock.js';
+
+export {
+  CORRELATION_HEADER,
+  contextFields,
+  correlationId,
+  createContext,
+  currentContext,
+  newCorrelationId,
+  runWithContext,
+  withContext,
+  type RequestContext,
+} from './context.js';
+
+export { configSchema, loadConfig, postgresUrl, redactedConfig, type Config } from './config.js';
+
+export {
+  RecordingLogger,
+  createLogger,
+  loggerFromConfig,
+  type LogFields,
+  type LogLevel,
+  type Logger,
+  type LoggerOptions,
+} from './logger.js';
+
+export {
+  Lifecycle,
+  type LifecycleOptions,
+  type LifecycleState,
+  type ShutdownHook,
+  type StartupHook,
+} from './lifecycle.js';
