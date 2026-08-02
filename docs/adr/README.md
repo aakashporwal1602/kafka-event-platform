@@ -19,6 +19,7 @@ Format follows [Michael Nygard's template](https://cognitect.com/blog/2011/11/15
 | [0006](./0006-avro-schema-registry.md)      | Avro with a schema registry for event contracts         | Accepted | 0       |
 | [0007](./0007-transactional-outbox.md)      | Transactional outbox for atomic state-and-event writes  | Accepted | 0       |
 | [0008](./0008-idempotency-strategy.md)      | At-least-once delivery with consumer-side idempotency   | Accepted | 0       |
+| [0009](./0009-hand-rolled-di-container.md)  | Hand-rolled DI container instead of a framework         | Accepted | 2       |
 
 ## Statuses
 

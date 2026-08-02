@@ -14,6 +14,64 @@ _Nothing yet._
 
 ---
 
+## [0.3.0] — 2026-08-02
+
+**Chapter 2 — Shared Core Library**
+
+### Added
+
+- **`@platform/core`** — cross-cutting primitives with no knowledge of Kafka,
+  HTTP or Postgres, so the domain stays testable without infrastructure
+  - `Result<T, E>` — expected failures as values. Exceptions hide the failure
+    path, and the transient-vs-permanent branch is too important to leave
+    implicit. Includes `all` (fail-fast, for bulk publish) and `partition`
+    (for HTTP 207 Multi-Status)
+  - **Error taxonomy** — `TransientError` / `PermanentError` hierarchy driving
+    the retry-vs-DLQ decision (ADR-0005). `retryable` is an abstract member so
+    two throw sites of one class cannot disagree. Unclassified errors default
+    to **permanent**: retrying an unknown error amplifies load during an
+    incident and hides inside normal retry traffic
+  - **DI container** — ~150 lines, no decorators, no `reflect-metadata`.
+    Branded symbol tokens give compile-time safety and let interfaces be
+    tokens. `verify()` eagerly constructs singletons so mis-wiring fails at
+    startup, where a health check catches it
+  - **`Clock`** — injectable time with separate wall-clock and monotonic
+    readings. `FixedClock` collapses an hour of retry backoff into a
+    synchronous assertion; `setTime()` reproduces NTP-correction bugs
+  - **Context propagation** — `AsyncLocalStorage`-based correlation IDs that
+    survive `await`, timers and promise continuations, with per-request
+    isolation under concurrency
+  - **Configuration** — Zod schema validated once at startup, reporting every
+    problem at once and returning a frozen object. Hand-written numeric
+    transforms instead of `z.coerce.number()`, which accepts `''` as `0` and
+    `'abc'` as `NaN`
+  - **Logger** — pino with automatic context injection, cause-chain
+    serialisation and secret redaction. `RecordingLogger` for assertions
+  - **Lifecycle** — two-phase graceful shutdown: drain (stop accepting)
+    then close (flush and release) in reverse registration order, with
+    per-hook and global deadlines below Kubernetes' grace period
+- **ADR-0009** — hand-rolled DI container instead of a framework
+- **`docs/lld/01-core-library.md`** — module map, error hierarchy, shutdown
+  state machine, and the testing seams the package provides
+- **The review standard** in `CONTRIBUTING.md` — every non-trivial decision
+  must carry its rejected alternative, accepted cost, scaling limit and
+  failure mode
+- 120 unit tests covering the properties that fail silently
+
+### Fixed
+
+- Type-aware linting now uses a dedicated `tsconfig.eslint.json`. The project
+  service resolves the nearest tsconfig per file, leaving every `*.test.ts`
+  unlintable because build configs exclude them; `allowDefaultProject` was not
+  a fix, since inferred projects run without `strictNullChecks`
+- `process.env` accessed with bracket notation, required by
+  `noPropertyAccessFromIndexSignature` — the rule turns an env-var typo into a
+  build failure instead of a silent `undefined`
+
+[0.3.0]: https://github.com/aakashporwal1602/kafka-event-platform/compare/v0.2.0...v0.3.0
+
+---
+
 ## [0.2.0] — 2026-08-02
 
 **Chapter 1 — Infrastructure Foundation**

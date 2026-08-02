@@ -2,17 +2,17 @@
 
 > Updated at the end of every chapter. Progress is measured in completed chapters, not lines of code.
 
-**Current version:** `v0.2.0` · **Progress:** 2 / 18 chapters (11.1%) · **Current phase:** Foundations
+**Current version:** `v0.3.0` · **Progress:** 3 / 18 chapters (16.7%) · **Current phase:** Foundations
 
 ```
-Part I   Foundations        ██████████░░░░░░░░░░  2/4
+Part I   Foundations        ███████████████░░░░░  3/4
 Part II  Publish path       ░░░░░░░░░░░░░░░░░░░░  0/3
 Part III Consume path       ░░░░░░░░░░░░░░░░░░░░  0/2
 Part IV  Failure handling   ░░░░░░░░░░░░░░░░░░░░  0/2
 Part V   Advanced patterns  ░░░░░░░░░░░░░░░░░░░░  0/4
 Part VI  Production         ░░░░░░░░░░░░░░░░░░░░  0/3
 ─────────────────────────────────────────────────────
-Overall                     ██░░░░░░░░░░░░░░░░░░  2/18  (11.1%)
+Overall                     ███░░░░░░░░░░░░░░░░░  3/18  (16.7%)
 ```
 
 ---
@@ -23,7 +23,7 @@ Overall                     ██░░░░░░░░░░░░░░░�
 | ----- | ----------------------------------- | --------- | --------------- | -------- | ------- |
 | **0** | **Architecture & Design Decisions** | `v0.1.0`  | ✅ **Complete** | —        | 4       |
 | **1** | **Infrastructure Foundation**       | `v0.2.0`  | ✅ **Complete** | Phase 1a | 3       |
-| 2     | Shared Core Library                 | `v0.3.0`  | ⬜ Not started  | —        | —       |
+| **2** | **Shared Core Library**             | `v0.3.0`  | ✅ **Complete** | —        | 9       |
 | 3     | Data Layer (Postgres + Redis)       | `v0.4.0`  | ⬜ Not started  | —        | —       |
 | 4     | Producer Service                    | `v0.5.0`  | ⬜ Not started  | Phase 1b | —       |
 | 5     | Gateway Service & Public APIs       | `v0.6.0`  | ⬜ Not started  | Phase 2  | —       |
@@ -111,5 +111,6 @@ Shortcut: `pnpm verify` runs the first four. Branch and PR conventions are in
 | -------- | ------- | ---------------------------------------------------------------- |
 | `v0.1.0` | 0       | Project initialisation, architecture and ADRs                    |
 | `v0.2.0` | 1       | 3-broker KRaft cluster, declarative topics, cluster verification |
+| `v0.3.0` | 2       | Result, errors, DI, clock, context, config, logger, lifecycle    |
 
 Target: **`v1.0.0`** at Chapter 17 — production-ready release.
