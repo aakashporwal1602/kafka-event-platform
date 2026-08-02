@@ -1,0 +1,16 @@
+apiVersion: 1
+
+providers:
+  - name: 'Kafka Event Platform'
+    orgId: 1
+    folder: 'Event Platform'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: false
+# Dashboard JSON lands in infra/grafana/dashboards/ in Chapter 12.
+# Dashboards are provisioned from files, not clicked together in the UI —
+# a dashboard that only exists in someone's browser is not infrastructure.

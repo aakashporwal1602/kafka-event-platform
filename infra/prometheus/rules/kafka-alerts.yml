@@ -1,0 +1,99 @@
+# Kafka alerting rules.
+# Each alert carries a runbook link — an alert without a documented response is
+# noise that gets silenced, and a silenced alert is worse than no alert.
+
+groups:
+  - name: kafka-cluster
+    interval: 30s
+    rules:
+      # The single most important Kafka signal: durability is currently weaker
+      # than configured, even though nothing has failed outright yet.
+      - alert: KafkaUnderReplicatedPartitions
+        expr: sum(kafka_topic_partition_under_replicated_partition) > 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: '{{ $value }} under-replicated partition(s)'
+          description: >-
+            ISR is smaller than the replica set. min.insync.replicas guarantees
+            are degraded. A further broker failure may reject writes or lose data.
+          runbook: docs/runbooks/kafka-under-replicated.md
+
+      - alert: KafkaBrokerDown
+        expr: count(kafka_brokers) < 3
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'Only {{ $value }} of 3 Kafka brokers online'
+          description: >-
+            With RF=3 and minISR=2 the cluster tolerates one broker loss.
+            Losing a second will reject all writes.
+          runbook: docs/runbooks/kafka-broker-down.md
+
+      - alert: KafkaOfflinePartitions
+        expr: sum(kafka_topic_partition_leader_is_preferred == 0) > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Partition leadership is not on preferred replicas'
+          description: >-
+            Leadership is unbalanced, usually after a broker restart. One broker
+            is handling disproportionate load. Run preferred leader election.
+          runbook: docs/runbooks/kafka-leader-imbalance.md
+
+  - name: kafka-consumers
+    interval: 30s
+    rules:
+      - alert: ConsumerGroupHighLag
+        expr: sum by (consumergroup, topic) (kafka_consumergroup_lag) > 10000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Consumer group {{ $labels.consumergroup }} lag on {{ $labels.topic }}'
+          description: '{{ $value }} messages behind. Check consumer health and downstream latency.'
+          runbook: docs/runbooks/consumer-lag.md
+
+      - alert: ConsumerGroupStalled
+        expr: |
+          sum by (consumergroup, topic) (rate(kafka_consumergroup_current_offset[5m])) == 0
+          and sum by (consumergroup, topic) (kafka_consumergroup_lag) > 0
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'Consumer group {{ $labels.consumergroup }} has stalled'
+          description: >-
+            Lag is non-zero but the committed offset is not advancing. The
+            consumer is stuck, crash-looping, or blocked on a poison message.
+          runbook: docs/runbooks/consumer-stalled.md
+
+  - name: kafka-platform
+    interval: 30s
+    rules:
+      - alert: DeadLetterQueueGrowing
+        expr: sum by (topic) (rate(kafka_topic_partition_current_offset{topic=~"dlq..*"}[15m])) > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Events arriving in {{ $labels.topic }}'
+          description: >-
+            Messages are reaching the dead letter queue. Inspect via the DLQ API
+            and determine whether this is a systemic failure or isolated bad data.
+          runbook: docs/runbooks/dlq-triage.md
+
+      - alert: RetryTierSaturation
+        expr: sum by (topic) (kafka_consumergroup_lag{topic=~"retry..*.1h"}) > 1000
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Retry tier {{ $labels.topic }} is saturated'
+          description: >-
+            Large volume in the final retry tier means a downstream dependency
+            has been failing for over an hour. Expect DLQ growth shortly.
+          runbook: docs/runbooks/retry-saturation.md
