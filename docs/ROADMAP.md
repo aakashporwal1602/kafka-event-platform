@@ -2,17 +2,17 @@
 
 > Updated at the end of every chapter. Progress is measured in completed chapters, not lines of code.
 
-**Current version:** `v0.3.0` · **Progress:** 3 / 18 chapters (16.7%) · **Current phase:** Foundations
+**Current version:** `v0.4.0` · **Progress:** 4 / 18 chapters (22.2%) · **Current phase:** Foundations complete
 
 ```
-Part I   Foundations        ███████████████░░░░░  3/4
+Part I   Foundations        ████████████████████  4/4
 Part II  Publish path       ░░░░░░░░░░░░░░░░░░░░  0/3
 Part III Consume path       ░░░░░░░░░░░░░░░░░░░░  0/2
 Part IV  Failure handling   ░░░░░░░░░░░░░░░░░░░░  0/2
 Part V   Advanced patterns  ░░░░░░░░░░░░░░░░░░░░  0/4
 Part VI  Production         ░░░░░░░░░░░░░░░░░░░░  0/3
 ─────────────────────────────────────────────────────
-Overall                     ███░░░░░░░░░░░░░░░░░  3/18  (16.7%)
+Overall                     ████░░░░░░░░░░░░░░░░  4/18  (22.2%)
 ```
 
 ---
@@ -24,7 +24,7 @@ Overall                     ███░░░░░░░░░░░░░░�
 | **0** | **Architecture & Design Decisions** | `v0.1.0`  | ✅ **Complete** | —        | 4       |
 | **1** | **Infrastructure Foundation**       | `v0.2.0`  | ✅ **Complete** | Phase 1a | 3       |
 | **2** | **Shared Core Library**             | `v0.3.0`  | ✅ **Complete** | —        | 9       |
-| 3     | Data Layer (Postgres + Redis)       | `v0.4.0`  | ⬜ Not started  | —        | —       |
+| **3** | **Data Layer (Postgres + Redis)**   | `v0.4.0`  | ✅ **Complete** | —        | 13      |
 | 4     | Producer Service                    | `v0.5.0`  | ⬜ Not started  | Phase 1b | —       |
 | 5     | Gateway Service & Public APIs       | `v0.6.0`  | ⬜ Not started  | Phase 2  | —       |
 | 6     | Schema Registry                     | `v0.7.0`  | ⬜ Not started  | Phase 3  | —       |

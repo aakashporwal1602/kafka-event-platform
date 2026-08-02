@@ -15,8 +15,35 @@
     "declaration": false,
     "declarationMap": false,
     "incremental": false,
-    "types": ["node"]
+    "types": ["node"],
+
+    // Point workspace imports at SOURCE, not at build output.
+    //
+    // `@platform/persistence` resolves through its package.json `exports` to
+    // `dist/index.d.ts`. On a clean checkout that file does not exist, so every
+    // import from a workspace package resolves to nothing and every type-aware
+    // rule reports `any` — around 130 no-unsafe-* errors from one missing
+    // directory, none of which name the actual cause.
+    //
+    // Project references were supposed to redirect output paths back to source,
+    // and they do inside the composite build graph. They do not help here: this
+    // project is deliberately non-composite and `tests/` belongs to no package,
+    // so its files sit outside that graph entirely.
+    //
+    // These paths apply to linting ONLY. `noEmit` is on, `tsc -b` never reads
+    // this file, and the real build still resolves through package exports —
+    // so there is no way for the two to disagree about what ships.
+    //
+    // MAINTENANCE: every new `@platform/*` package needs a line here, or
+    // linting it from `tests/` fails on a clean checkout.
+    "paths": {
+      "@platform/core": ["./packages/core/src/index.ts"],
+      "@platform/persistence": ["./packages/persistence/src/index.ts"]
+    }
   },
+  // Deliberately no `references`. They would be ignored — this project is not
+  // part of the build graph — and their presence would suggest the resolution
+  // above depends on them. It does not: `paths` is the whole mechanism.
   "include": ["**/*.ts", "**/*.js", "**/*.mjs"],
   "exclude": ["node_modules", "**/node_modules", "**/dist", "coverage"]
 }
