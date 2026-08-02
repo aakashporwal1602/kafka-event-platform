@@ -139,7 +139,9 @@ function printPlan(plan: Plan): void {
     }
   }
   if (PRUNE && plan.unmanaged.length) {
-    console.log(`\n${c.yellow}  Unmanaged topics (present on cluster, absent from config):${c.reset}`);
+    console.log(
+      `\n${c.yellow}  Unmanaged topics (present on cluster, absent from config):${c.reset}`,
+    );
     for (const name of plan.unmanaged) console.log(`${c.dim}      ${name}${c.reset}`);
     console.log(`${c.dim}      Not deleted. Remove manually if intentional.${c.reset}`);
   }

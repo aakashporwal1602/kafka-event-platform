@@ -38,21 +38,23 @@ A single **pnpm workspace** monorepo. Shared code lives in `packages/*`, deploya
 
 ## Alternatives considered
 
-| Option | Why rejected |
-|---|---|
-| **Polyrepo + published packages** | Realistic at large scale, but coordination cost dominates at this size, and it makes the project unreviewable as a portfolio artefact |
-| **npm workspaces** | Works, but hoisted `node_modules` permits phantom dependencies and installs are slower |
-| **Yarn Berry (PnP)** | Strict and fast, but PnP still causes tooling friction with some Node-native modules |
-| **Nx / Turborepo** | Genuinely useful task graphs and caching, but they add a build-orchestration layer whose value only appears at much larger scale. `tsc -b` plus pnpm scripts covers our needs, and the config stays readable. |
+| Option                            | Why rejected                                                                                                                                                                                                  |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Polyrepo + published packages** | Realistic at large scale, but coordination cost dominates at this size, and it makes the project unreviewable as a portfolio artefact                                                                         |
+| **npm workspaces**                | Works, but hoisted `node_modules` permits phantom dependencies and installs are slower                                                                                                                        |
+| **Yarn Berry (PnP)**              | Strict and fast, but PnP still causes tooling friction with some Node-native modules                                                                                                                          |
+| **Nx / Turborepo**                | Genuinely useful task graphs and caching, but they add a build-orchestration layer whose value only appears at much larger scale. `tsc -b` plus pnpm scripts covers our needs, and the config stays readable. |
 
 ## Consequences
 
 **Positive**
+
 - One clone, one `pnpm install`, one `pnpm verify`.
 - Refactors that span services are safe and reviewable.
 - The dependency graph is explicit and machine-enforced.
 
 **Negative / accepted costs**
+
 - CI runs more than strictly necessary unless we add affected-package detection (deferred; revisit if
   CI exceeds ~10 minutes).
 - Repository grows large over time; `git clone --filter=blob:none` mitigates.
@@ -60,6 +62,7 @@ A single **pnpm workspace** monorepo. Shared code lives in `packages/*`, deploya
   and an ESLint import rule.
 
 **Neutral**
+
 - Each service still builds an independent Docker image; the monorepo is a development-time
   organisation, not a deployment coupling.
 

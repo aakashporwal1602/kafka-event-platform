@@ -21,8 +21,8 @@ Why this option beats the alternatives, given the context above.
 ## Alternatives considered
 
 | Option | Why rejected |
-|---|---|
-| | |
+| ------ | ------------ |
+|        |              |
 
 ## Consequences
 

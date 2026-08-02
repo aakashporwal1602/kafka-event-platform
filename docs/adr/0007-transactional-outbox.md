@@ -9,7 +9,7 @@
 A service that changes state and publishes an event about that change has a **dual-write problem**:
 
 ```ts
-await db.orders.insert(order);        // (1) commits
+await db.orders.insert(order); // (1) commits
 await kafka.publish('order.created'); // (2) crashes here
 ```
 
@@ -57,33 +57,36 @@ Two relay implementations are supported:
 
 ## Alternatives considered
 
-| Option | Why rejected |
-|---|---|
-| **Naive dual write** | The problem being solved |
-| **Publish first, then persist** | Same window, worse failure mode — consumers see events for state that never committed |
-| **Two-phase commit (XA)** | Kafka does not support XA. Even where 2PC exists it is slow, and a coordinator failure blocks participants holding locks |
+| Option                                                      | Why rejected                                                                                                                                                                           |
+| ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Naive dual write**                                        | The problem being solved                                                                                                                                                               |
+| **Publish first, then persist**                             | Same window, worse failure mode — consumers see events for state that never committed                                                                                                  |
+| **Two-phase commit (XA)**                                   | Kafka does not support XA. Even where 2PC exists it is slow, and a coordinator failure blocks participants holding locks                                                               |
 | **Kafka as the only source of truth (pure event sourcing)** | Legitimate architecture, but it forces every query to go through a projection and imposes event sourcing on teams that do not need it. Considered in Ch 11 as an option, not a default |
-| **Idempotent producer alone** | Kafka's idempotent producer prevents duplicates *within* a producer session. It does nothing about the database/Kafka atomicity gap |
+| **Idempotent producer alone**                               | Kafka's idempotent producer prevents duplicates _within_ a producer session. It does nothing about the database/Kafka atomicity gap                                                    |
 
 ## Consequences
 
 **Positive**
+
 - No lost events, ever, for services that use the outbox.
 - Works with any database that has transactions.
 - Provides a durable, queryable audit trail of intent.
 
 **Negative / accepted costs**
+
 - **Added latency** between commit and publish — milliseconds with CDC, up to the poll interval with
   polling.
 - **Outbox table growth.** Requires a retention/cleanup job; forgetting it is a classic production
   incident.
 - **CDC brings operational weight**: replication slots, and the failure mode everyone hits once —
-  *an inactive replication slot prevents WAL cleanup and eventually fills the disk*. Slot lag must be
+  _an inactive replication slot prevents WAL cleanup and eventually fills the disk_. Slot lag must be
   monitored and alerted from day one.
 - Application code must remember to write to the outbox; mitigated by a repository helper so it is one
   call, not a checklist item.
 
 **Neutral**
+
 - Polling and CDC are interchangeable behind the same relay interface — start with polling, move to CDC
   when latency demands it.
 

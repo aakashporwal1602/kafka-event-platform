@@ -118,9 +118,10 @@ describe('TOPICS — naming convention', () => {
     );
     for (const domain of domains) {
       for (const tier of RETRY_TIERS) {
-        expect(names.has(`retry.${domain}.${tier.suffix}`), `missing retry.${domain}.${tier.suffix}`).toBe(
-          true,
-        );
+        expect(
+          names.has(`retry.${domain}.${tier.suffix}`),
+          `missing retry.${domain}.${tier.suffix}`,
+        ).toBe(true);
       }
     }
   });

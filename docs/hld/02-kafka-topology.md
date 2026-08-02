@@ -2,7 +2,7 @@
 
 > **Status:** Baseline (Chapter 1) · Companion to [01-system-architecture.md](./01-system-architecture.md)
 
-This document explains *why* the cluster is configured the way it is. Every setting in
+This document explains _why_ the cluster is configured the way it is. Every setting in
 `infra/docker/docker-compose.yml` and `tools/topics.config.ts` traces back to something here.
 
 ---
@@ -45,11 +45,11 @@ documented in [ADR-0001](../adr/0001-kafka-kraft-mode.md).
 
 Three listeners per broker, each with a different job:
 
-| Listener | Port | Used by | Advertised as |
-|---|---|---|---|
-| `INTERNAL` | 9092 | Broker↔broker, and containers on `kep-network` | `kafka-N:9092` |
-| `EXTERNAL` | 1909N | Your laptop, outside Docker | `localhost:1909N` |
-| `CONTROLLER` | 9093 | Raft quorum only | — |
+| Listener     | Port  | Used by                                        | Advertised as     |
+| ------------ | ----- | ---------------------------------------------- | ----------------- |
+| `INTERNAL`   | 9092  | Broker↔broker, and containers on `kep-network` | `kafka-N:9092`    |
+| `EXTERNAL`   | 1909N | Your laptop, outside Docker                    | `localhost:1909N` |
+| `CONTROLLER` | 9093  | Raft quorum only                               | —                 |
 
 **Why two client listeners at all.** A Kafka client does not talk to whatever address you gave it. It
 connects once for metadata, then Kafka replies with the **advertised** address of each partition
@@ -143,11 +143,11 @@ which is how the leader knows it is caught up. There is no separate acknowledgem
 
 ### The three settings that must be reasoned about together
 
-| Setting | Value | Meaning |
-|---|---|---|
-| `replication.factor` | 3 | Three copies exist |
-| `min.insync.replicas` | 2 | At least two must be in sync for a write to be accepted |
-| `acks` (producer) | `all` | Leader waits for all *in-sync* replicas before acknowledging |
+| Setting               | Value | Meaning                                                      |
+| --------------------- | ----- | ------------------------------------------------------------ |
+| `replication.factor`  | 3     | Three copies exist                                           |
+| `min.insync.replicas` | 2     | At least two must be in sync for a write to be accepted      |
+| `acks` (producer)     | `all` | Leader waits for all _in-sync_ replicas before acknowledging |
 
 **None of these works alone.** `acks=all` with `min.insync.replicas=1` is a trap: if the ISR has
 shrunk to just the leader, `all` means "the leader", and a leader crash loses acknowledged data. The
@@ -163,14 +163,14 @@ RF=3 + minISR=2 + acks=all
 
 ### Failure walk-through
 
-| Scenario | ISR | Behaviour |
-|---|---|---|
-| All healthy | `[1,2,3]` | Writes acknowledged after 3 replicas |
-| Broker 3 slow (GC pause) | `[1,2]` | Writes continue — ISR 2 ≥ minISR 2 |
-| Broker 3 down | `[1,2]` | Writes continue; b3 re-joins and catches up on restart |
-| Brokers 2 and 3 down | `[1]` | **Writes rejected** with `NOT_ENOUGH_REPLICAS`. Reads still served |
-| Leader b1 dies, ISR `[1,2,3]` | `[2,3]` | b2 or b3 promoted; **no data loss** — both were in sync |
-| Leader b1 dies, ISR `[1]` | — | Partition offline. With `unclean.leader.election=false` we **wait** rather than promote a stale replica |
+| Scenario                      | ISR       | Behaviour                                                                                               |
+| ----------------------------- | --------- | ------------------------------------------------------------------------------------------------------- |
+| All healthy                   | `[1,2,3]` | Writes acknowledged after 3 replicas                                                                    |
+| Broker 3 slow (GC pause)      | `[1,2]`   | Writes continue — ISR 2 ≥ minISR 2                                                                      |
+| Broker 3 down                 | `[1,2]`   | Writes continue; b3 re-joins and catches up on restart                                                  |
+| Brokers 2 and 3 down          | `[1]`     | **Writes rejected** with `NOT_ENOUGH_REPLICAS`. Reads still served                                      |
+| Leader b1 dies, ISR `[1,2,3]` | `[2,3]`   | b2 or b3 promoted; **no data loss** — both were in sync                                                 |
+| Leader b1 dies, ISR `[1]`     | —         | Partition offline. With `unclean.leader.election=false` we **wait** rather than promote a stale replica |
 
 ### Unclean leader election is off
 
@@ -185,14 +185,14 @@ might reasonably choose the opposite.
 
 ## 5. Producer acknowledgement modes
 
-| `acks` | Waits for | Durability | Throughput | Use |
-|---|---|---|---|---|
-| `0` | nothing | ✗ fire-and-forget | Highest | Metrics you can afford to lose |
-| `1` | leader only | ⚠ lost if leader dies before replication | High | Logs, analytics |
-| `all` | all in-sync replicas | ✓ survives leader loss | Lower | **Our default** |
+| `acks` | Waits for            | Durability                               | Throughput | Use                            |
+| ------ | -------------------- | ---------------------------------------- | ---------- | ------------------------------ |
+| `0`    | nothing              | ✗ fire-and-forget                        | Highest    | Metrics you can afford to lose |
+| `1`    | leader only          | ⚠ lost if leader dies before replication | High       | Logs, analytics                |
+| `all`  | all in-sync replicas | ✓ survives leader loss                   | Lower      | **Our default**                |
 
 The cost of `acks=all` is one extra network round trip, largely hidden by batching. For a platform
-whose non-functional requirement N-3 is *zero acknowledged-then-lost events*, it is not optional.
+whose non-functional requirement N-3 is _zero acknowledged-then-lost events_, it is not optional.
 
 ---
 
@@ -215,17 +215,17 @@ pattern (`retry.*`, `dlq.*`) rather than being enumerated per topic. The alterna
 
 ## 7. Retention
 
-| Topic class | Retention | Rationale |
-|---|---|---|
-| `events.*` | 7 days | Long enough to replay a week of history; the dominant storage cost |
-| `events.payments` | 30 days | Financial reconciliation needs a longer window |
-| `retry.*` | 3 days | A message not resolved in 3 days is in the DLQ anyway |
-| `dlq.*` | 30 days | Somebody investigates these — 7 days is not enough after a holiday weekend |
-| `platform.schemas` | **infinite, compacted** | The current schema for every subject must exist forever |
-| `platform.audit` | 90 days | Compliance |
+| Topic class        | Retention               | Rationale                                                                  |
+| ------------------ | ----------------------- | -------------------------------------------------------------------------- |
+| `events.*`         | 7 days                  | Long enough to replay a week of history; the dominant storage cost         |
+| `events.payments`  | 30 days                 | Financial reconciliation needs a longer window                             |
+| `retry.*`          | 3 days                  | A message not resolved in 3 days is in the DLQ anyway                      |
+| `dlq.*`            | 30 days                 | Somebody investigates these — 7 days is not enough after a holiday weekend |
+| `platform.schemas` | **infinite, compacted** | The current schema for every subject must exist forever                    |
+| `platform.audit`   | 90 days                 | Compliance                                                                 |
 
-**Compaction on `platform.schemas`** is the interesting one: `cleanup.policy=compact` keeps the *latest
-value per key* forever and discards superseded versions. The topic becomes a durable key-value store —
+**Compaction on `platform.schemas`** is the interesting one: `cleanup.policy=compact` keeps the _latest
+value per key_ forever and discards superseded versions. The topic becomes a durable key-value store —
 which is exactly how Confluent Schema Registry stores its own state (Chapter 6).
 
 ---
@@ -272,7 +272,7 @@ decision, not a config tweak.
 <summary><b>What does <code>acks=all</code> actually guarantee?</b></summary>
 
 Only as much as `min.insync.replicas` allows. `acks=all` means the leader waits for all replicas
-*currently in the ISR* — so with `minISR=1` and a shrunk ISR, "all" is just the leader, and a leader
+_currently in the ISR_ — so with `minISR=1` and a shrunk ISR, "all" is just the leader, and a leader
 crash loses acknowledged data. The guarantee comes from the combination RF=3 + minISR=2 + acks=all:
 one broker can fail with writes continuing and nothing lost; two failing rejects writes, which is
 correct behaviour rather than a bug.
@@ -285,7 +285,7 @@ It has fallen more than `replica.lag.time.max.ms` (30s default) behind the leade
 pause, disk saturation or a network problem. It still holds a copy but is not counted toward
 `min.insync.replicas`, so durability is temporarily weaker than configured even though nothing has
 failed outright. That is why under-replicated partitions is the metric I alert on: it's the early
-warning *before* an incident.
+warning _before_ an incident.
 </details>
 
 <details>
@@ -312,7 +312,7 @@ code applied to Kafka.
 <summary><b>Bootstrap connects but producing times out. Diagnose it.</b></summary>
 
 Almost always advertised listeners. The client bootstraps successfully, receives metadata containing
-the broker's *advertised* address, and then cannot reach it — for example the broker advertises
+the broker's _advertised_ address, and then cannot reach it — for example the broker advertises
 `kafka-1:9092`, which resolves inside Docker but not from the host. The fix is separate listeners with
 correct advertised addresses per network: `INTERNAL://kafka-1:9092` for containers,
 `EXTERNAL://localhost:19092` for the host.

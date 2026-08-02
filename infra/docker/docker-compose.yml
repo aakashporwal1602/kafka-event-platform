@@ -20,14 +20,17 @@ x-kafka-common: &kafka-common
   restart: unless-stopped
   networks: [platform]
   healthcheck:
-    test: ['CMD-SHELL', '/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 >/dev/null 2>&1']
+    test:
+      [
+        'CMD-SHELL',
+        '/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 >/dev/null 2>&1',
+      ]
     interval: 10s
     timeout: 10s
     retries: 12
     start_period: 30s
 
-x-kafka-env: &kafka-env
-  # --- KRaft: every node is both broker and controller (local only) ---------
+x-kafka-env: &kafka-env # --- KRaft: every node is both broker and controller (local only) ---------
   KAFKA_PROCESS_ROLES: broker,controller
   KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka-1:9093,2@kafka-2:9093,3@kafka-3:9093
   KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
@@ -148,7 +151,8 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-platform} -d ${POSTGRES_DB:-event_platform}']
+      test:
+        ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-platform} -d ${POSTGRES_DB:-event_platform}']
       interval: 10s
       timeout: 5s
       retries: 5

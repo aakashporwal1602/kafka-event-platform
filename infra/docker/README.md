@@ -13,16 +13,16 @@ pnpm cluster:verify           # assert durability guarantees are in force
 
 ## Services
 
-| Service | Host port | Purpose |
-|---|---|---|
-| kafka-1 / 2 / 3 | 19092 / 19093 / 19094 | 3-broker KRaft cluster |
-| kafka-ui | 8080 | Topic browser, consumer groups, message viewer |
-| postgres | 5432 | Platform metadata; `wal_level=logical` for CDC |
-| redis | 6379 | Idempotency, locks, rate limits |
-| prometheus | 9090 | Metrics |
-| grafana | 3001 | Dashboards (`admin` / `admin`) |
-| jaeger | 16686 | Distributed traces |
-| kafka-exporter | 9308 | Kafka → Prometheus metrics |
+| Service         | Host port             | Purpose                                        |
+| --------------- | --------------------- | ---------------------------------------------- |
+| kafka-1 / 2 / 3 | 19092 / 19093 / 19094 | 3-broker KRaft cluster                         |
+| kafka-ui        | 8080                  | Topic browser, consumer groups, message viewer |
+| postgres        | 5432                  | Platform metadata; `wal_level=logical` for CDC |
+| redis           | 6379                  | Idempotency, locks, rate limits                |
+| prometheus      | 9090                  | Metrics                                        |
+| grafana         | 3001                  | Dashboards (`admin` / `admin`)                 |
+| jaeger          | 16686                 | Distributed traces                             |
+| kafka-exporter  | 9308                  | Kafka → Prometheus metrics                     |
 
 ## Connecting
 
@@ -95,10 +95,10 @@ single broker by commenting out `kafka-2`/`kafka-3` and setting the replication-
 
 ## Troubleshooting
 
-| Symptom | Cause | Fix |
-|---|---|---|
-| Brokers restart-loop on first run | Stale volume with a different `CLUSTER_ID` | `pnpm infra:nuke` |
-| `LEADER_NOT_AVAILABLE` right after start | Topics not provisioned yet | `pnpm topics:bootstrap` |
-| Bootstrap OK, produce times out | Wrong listener for your network location | Use `localhost:1909N` from the host |
-| `NOT_ENOUGH_REPLICAS` | Two or more brokers down | Restart brokers; check `docker ps` |
-| Kafka UI shows no cluster | UI started before brokers were healthy | `docker restart kep-kafka-ui` |
+| Symptom                                  | Cause                                      | Fix                                 |
+| ---------------------------------------- | ------------------------------------------ | ----------------------------------- |
+| Brokers restart-loop on first run        | Stale volume with a different `CLUSTER_ID` | `pnpm infra:nuke`                   |
+| `LEADER_NOT_AVAILABLE` right after start | Topics not provisioned yet                 | `pnpm topics:bootstrap`             |
+| Bootstrap OK, produce times out          | Wrong listener for your network location   | Use `localhost:1909N` from the host |
+| `NOT_ENOUGH_REPLICAS`                    | Two or more brokers down                   | Restart brokers; check `docker ps`  |
+| Kafka UI shows no cluster                | UI started before brokers were healthy     | `docker restart kep-kafka-ui`       |

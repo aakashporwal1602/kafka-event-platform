@@ -53,7 +53,9 @@ async function checkCluster(admin: Admin): Promise<void> {
   const info = await admin.describeCluster();
 
   if (info.brokers.length === 3) {
-    pass(`3 brokers online — ${info.brokers.map((b) => `${b.nodeId}@${b.host}:${b.port}`).join(', ')}`);
+    pass(
+      `3 brokers online — ${info.brokers.map((b) => `${b.nodeId}@${b.host}:${b.port}`).join(', ')}`,
+    );
   } else {
     fail(`expected 3 brokers, found ${info.brokers.length}`);
   }
@@ -114,7 +116,9 @@ async function checkTopics(admin: Admin): Promise<void> {
   const distribution = counts.map(([node, n]) => `broker ${node}: ${n}`).join(', ');
   if (skew > 0.3) {
     warn(`leadership skew ${(skew * 100).toFixed(0)}% — ${distribution}`);
-    console.log(`${c.dim}      consider kafka-leader-election.sh --election-type PREFERRED${c.reset}`);
+    console.log(
+      `${c.dim}      consider kafka-leader-election.sh --election-type PREFERRED${c.reset}`,
+    );
   } else {
     pass(`leadership balanced across brokers — ${distribution}`);
   }
@@ -131,7 +135,9 @@ async function checkDurabilityConfig(admin: Admin): Promise<void> {
   for (const resource of result.resources) {
     const entry = resource.configEntries.find((e) => e.configName === 'min.insync.replicas');
     if (entry?.configValue !== '2') {
-      fail(`${resource.resourceName}: min.insync.replicas=${entry?.configValue ?? 'unset'}, expected 2`);
+      fail(
+        `${resource.resourceName}: min.insync.replicas=${entry?.configValue ?? 'unset'}, expected 2`,
+      );
       violations++;
     }
   }
@@ -161,7 +167,9 @@ async function main(): Promise<void> {
 
   console.log('');
   if (failures > 0) {
-    console.log(`${c.red}${c.bold}FAILED${c.reset} — ${failures} error(s), ${warnings} warning(s)\n`);
+    console.log(
+      `${c.red}${c.bold}FAILED${c.reset} — ${failures} error(s), ${warnings} warning(s)\n`,
+    );
     process.exitCode = 1;
   } else if (warnings > 0) {
     console.log(`${c.yellow}${c.bold}PASSED WITH WARNINGS${c.reset} — ${warnings} warning(s)\n`);

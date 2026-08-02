@@ -37,27 +37,30 @@ OpenAPI document from those schemas via `@fastify/swagger`.
 
 ## Alternatives considered
 
-| Option | Why rejected |
-|---|---|
-| **Express 5** | Ubiquitous and well understood, but no built-in validation or serialization compilation, and middleware is untyped. It is the safe answer, not the considered one. |
-| **NestJS** | Excellent structure and DI, but heavy: decorators, metadata reflection and a large runtime. It would also *hide* the architectural decisions this project exists to demonstrate — the DI container becomes framework magic instead of something we designed. |
-| **Hono** | Very fast and elegant, but its strength is edge/serverless runtimes; the Node ecosystem integration (Kafka, Postgres, OTel) is less mature. |
-| **Raw `node:http`** | Maximum control, but re-implementing routing, validation and lifecycle is undifferentiated work. |
+| Option              | Why rejected                                                                                                                                                                                                                                                 |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Express 5**       | Ubiquitous and well understood, but no built-in validation or serialization compilation, and middleware is untyped. It is the safe answer, not the considered one.                                                                                           |
+| **NestJS**          | Excellent structure and DI, but heavy: decorators, metadata reflection and a large runtime. It would also _hide_ the architectural decisions this project exists to demonstrate — the DI container becomes framework magic instead of something we designed. |
+| **Hono**            | Very fast and elegant, but its strength is edge/serverless runtimes; the Node ecosystem integration (Kafka, Postgres, OTel) is less mature.                                                                                                                  |
+| **Raw `node:http`** | Maximum control, but re-implementing routing, validation and lifecycle is undifferentiated work.                                                                                                                                                             |
 
 ## Consequences
 
 **Positive**
+
 - Higher throughput per instance; measurably lower p99 at the gateway.
 - Schemas, types and API docs cannot drift apart.
 - Encapsulated plugins keep service wiring explicit.
 
 **Negative / accepted costs**
+
 - Smaller ecosystem than Express; some middleware needs a Fastify-specific equivalent.
 - The plugin encapsulation model has a genuine learning curve — decorators registered in a child
   scope are not visible to the parent, which surprises people once.
 - Team familiarity with Express is more common (noted, not decisive).
 
 **Neutral**
+
 - Fastify supports Express middleware via `@fastify/middie` if we ever need it.
 
 ## Revisit when

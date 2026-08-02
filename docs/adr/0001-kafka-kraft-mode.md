@@ -36,25 +36,28 @@ Run all Kafka clusters in **KRaft mode**. In local development, brokers run in c
 
 ## Alternatives considered
 
-| Option | Why rejected |
-|---|---|
-| ZooKeeper-based Kafka | Removed in Kafka 4.0; two consensus systems to operate; slow controller failover |
-| Redpanda | Excellent engineering and Kafka-API compatible, but the goal is to demonstrate *Kafka* expertise, and some Kafka internals (KRaft, ISR mechanics) would no longer apply |
-| Managed Kafka (MSK / Confluent Cloud) | Hides exactly the internals this project exists to demonstrate; also costs money to run |
-| NATS JetStream / Pulsar | Different architecture and semantics; not what the industry means by "Kafka experience" |
+| Option                                | Why rejected                                                                                                                                                            |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ZooKeeper-based Kafka                 | Removed in Kafka 4.0; two consensus systems to operate; slow controller failover                                                                                        |
+| Redpanda                              | Excellent engineering and Kafka-API compatible, but the goal is to demonstrate _Kafka_ expertise, and some Kafka internals (KRaft, ISR mechanics) would no longer apply |
+| Managed Kafka (MSK / Confluent Cloud) | Hides exactly the internals this project exists to demonstrate; also costs money to run                                                                                 |
+| NATS JetStream / Pulsar               | Different architecture and semantics; not what the industry means by "Kafka experience"                                                                                 |
 
 ## Consequences
 
 **Positive**
+
 - Single-system operations; simpler local setup; faster metadata operations.
 - Aligned with the only supported path going forward.
 
 **Negative / accepted costs**
+
 - Some older tutorials, Stack Overflow answers and tooling still assume ZooKeeper.
 - A few third-party tools have lagged on KRaft support (mitigated: we use Kafka UI, which supports it).
 - Combined-mode local dev differs from split-mode production — documented explicitly in the infra README.
 
 **Neutral**
+
 - Client applications are unaffected; KRaft is entirely server-side.
 
 ## Revisit when

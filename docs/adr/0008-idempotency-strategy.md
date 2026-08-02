@@ -7,11 +7,11 @@
 ## Context
 
 "Exactly-once" is the most misunderstood phrase in event streaming. In a distributed system with
-independent failure, **exactly-once *delivery* is provably impossible** — the two-generals problem.
+independent failure, **exactly-once _delivery_ is provably impossible** — the two-generals problem.
 A consumer that crashes between processing a message and committing its offset will receive that
 message again on restart, and no protocol can prevent it.
 
-What *is* achievable is **exactly-once effect**: the message may arrive more than once, but the
+What _is_ achievable is **exactly-once effect**: the message may arrive more than once, but the
 observable outcome happens once.
 
 Kafka does offer transactions (`read-process-write` with `isolation.level=read_committed`), which
@@ -31,7 +31,7 @@ The platform delivers **at-least-once** and makes effects idempotent at the cons
 3. **Kafka transactions where the effect is Kafka-only.** The retry engine and replay service, which
    consume-and-produce without external side effects, use transactional producers.
 
-Redis is a **fast path, not the source of truth**. If Redis is unavailable we fail *open* — process the
+Redis is a **fast path, not the source of truth**. If Redis is unavailable we fail _open_ — process the
 message and rely on layer 2 (the database constraint), because blocking the entire consumer on a cache
 outage is worse than a rare duplicate attempt that the database will reject anyway.
 
@@ -41,7 +41,7 @@ outage is worse than a rare duplicate attempt that the database will reject anyw
   that claim would be dangerous.
 - **Defence in depth.** Redis catches the common case cheaply; the database constraint catches
   everything Redis misses (eviction, outage, TTL expiry during a long replay).
-- **It survives replay.** Chapter 10 replays historical events *deliberately*. Idempotent handlers make
+- **It survives replay.** Chapter 10 replays historical events _deliberately_. Idempotent handlers make
   replay a safe operation rather than a data-corruption event — this is the property that makes the
   whole replay feature viable.
 - **Kafka transactions are used where they genuinely fit** and avoided where they would give false
@@ -52,31 +52,33 @@ outage is worse than a rare duplicate attempt that the database will reject anyw
 Choosing the key is the part people get wrong. It must be **deterministic from the event's business
 meaning**, not from delivery metadata:
 
-| Key choice | Verdict |
-|---|---|
-| `uuid()` generated at consume time | ✗ Different on every delivery — useless |
-| Kafka `partition:offset` | ✗ Changes on replay and on re-publish; a replayed event would re-execute |
-| `messageId` from the producer | ⚠ Works only if the producer is itself idempotent |
-| **`{eventType}:{aggregateId}:{version}`** | ✓ Deterministic, stable across replay, business-meaningful |
+| Key choice                                | Verdict                                                                  |
+| ----------------------------------------- | ------------------------------------------------------------------------ |
+| `uuid()` generated at consume time        | ✗ Different on every delivery — useless                                  |
+| Kafka `partition:offset`                  | ✗ Changes on replay and on re-publish; a replayed event would re-execute |
+| `messageId` from the producer             | ⚠ Works only if the producer is itself idempotent                        |
+| **`{eventType}:{aggregateId}:{version}`** | ✓ Deterministic, stable across replay, business-meaningful               |
 
 ## Alternatives considered
 
-| Option | Why rejected |
-|---|---|
-| **Kafka EOS as the primary mechanism** | Only covers Kafka-to-Kafka. Breaks the moment a handler touches an external system, which is nearly always. Also adds transaction-coordinator overhead and reduces throughput |
-| **At-most-once (commit before processing)** | Silently loses messages on crash. Unacceptable for anything that matters |
-| **Database-only dedup (no Redis)** | Correct but slow — a round trip and an index write per message. Redis handles the 99% case in sub-millisecond |
-| **Redis-only dedup (no DB constraint)** | Redis is a cache: it evicts, it can lose data on failover. Sole reliance would produce silent duplicates |
-| **Bloom filter** | Space-efficient but false positives mean *dropping real messages*. Unacceptable |
+| Option                                      | Why rejected                                                                                                                                                                  |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Kafka EOS as the primary mechanism**      | Only covers Kafka-to-Kafka. Breaks the moment a handler touches an external system, which is nearly always. Also adds transaction-coordinator overhead and reduces throughput |
+| **At-most-once (commit before processing)** | Silently loses messages on crash. Unacceptable for anything that matters                                                                                                      |
+| **Database-only dedup (no Redis)**          | Correct but slow — a round trip and an index write per message. Redis handles the 99% case in sub-millisecond                                                                 |
+| **Redis-only dedup (no DB constraint)**     | Redis is a cache: it evicts, it can lose data on failover. Sole reliance would produce silent duplicates                                                                      |
+| **Bloom filter**                            | Space-efficient but false positives mean _dropping real messages_. Unacceptable                                                                                               |
 
 ## Consequences
 
 **Positive**
+
 - No message loss.
 - Replay and retry are safe by construction.
 - Degrades gracefully — a Redis outage costs efficiency, not correctness.
 
 **Negative / accepted costs**
+
 - **Every handler must be idempotent.** This is a real constraint on handler authors, and it is enforced
   by convention and code review rather than by the type system. The consumer framework (Ch 7) makes the
   correct path the default by requiring an explicit `idempotencyKey` from each handler.
@@ -87,6 +89,7 @@ meaning**, not from delivery metadata:
 - Two mechanisms to reason about instead of one.
 
 **Neutral**
+
 - Ordering is unaffected; dedup is per-key, not per-partition.
 
 ## Revisit when

@@ -30,14 +30,14 @@ Think of it as a simplified version of the internal event platforms at Uber, Lin
 
 ## Why it exists
 
-| Without a platform | With this platform |
-|---|---|
-| A producer adds a required field; three consumers crash at 2am | Schema registry rejects the incompatible change **in CI** |
-| A poison message blocks a partition; lag grows without bound | Tiered retry topics — **the partition never blocks** |
-| Un-processable events are logged and lost | Dead-letter queue with full context and selective redrive |
-| A bug corrupts a projection; someone writes a backfill script under pressure | Replay by offset, timestamp, partition or key |
-| At-least-once delivery meets a non-idempotent handler; customers are charged twice | Redis dedup + idempotent sinks = **exactly-once effect** |
-| A stuck consumer is discovered via a customer complaint | Lag alerting with runbook links |
+| Without a platform                                                                 | With this platform                                        |
+| ---------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| A producer adds a required field; three consumers crash at 2am                     | Schema registry rejects the incompatible change **in CI** |
+| A poison message blocks a partition; lag grows without bound                       | Tiered retry topics — **the partition never blocks**      |
+| Un-processable events are logged and lost                                          | Dead-letter queue with full context and selective redrive |
+| A bug corrupts a projection; someone writes a backfill script under pressure       | Replay by offset, timestamp, partition or key             |
+| At-least-once delivery meets a non-idempotent handler; customers are charged twice | Redis dedup + idempotent sinks = **exactly-once effect**  |
+| A stuck consumer is discovered via a customer complaint                            | Lag alerting with runbook links                           |
 
 ---
 
@@ -66,19 +66,19 @@ Decisions and their trade-offs: **[docs/adr/](./docs/adr/README.md)**
 
 ## Capabilities
 
-| | Capability | Chapter |
-|---|---|---|
-| 📤 | Publish single and batch events via REST or SDK | 4–5 |
-| 📋 | Avro schema registry with BACKWARD/FORWARD/FULL compatibility enforcement | 6 |
-| 📥 | Consumer framework with backpressure and cooperative rebalancing | 7 |
-| 🔁 | Non-blocking tiered retries with exponential backoff and jitter | 9 |
-| ☠️ | Dead-letter queue with inspection API and selective redrive | 9 |
-| ⏪ | Replay by offset, timestamp, partition or key | 10 |
-| 🔂 | Idempotency via Redis + idempotent sinks (exactly-once *effect*) | 8 |
-| 📦 | Transactional outbox and CDC integration | 11 |
-| 📊 | Prometheus metrics, Grafana dashboards, OpenTelemetry tracing | 12 |
-| 🔐 | JWT / API keys, RBAC, Kafka ACLs, per-tenant quotas | 13 |
-| ⏰ | Delayed, scheduled and priority events; signed webhooks | 14 |
+|     | Capability                                                                | Chapter |
+| --- | ------------------------------------------------------------------------- | ------- |
+| 📤  | Publish single and batch events via REST or SDK                           | 4–5     |
+| 📋  | Avro schema registry with BACKWARD/FORWARD/FULL compatibility enforcement | 6       |
+| 📥  | Consumer framework with backpressure and cooperative rebalancing          | 7       |
+| 🔁  | Non-blocking tiered retries with exponential backoff and jitter           | 9       |
+| ☠️  | Dead-letter queue with inspection API and selective redrive               | 9       |
+| ⏪  | Replay by offset, timestamp, partition or key                             | 10      |
+| 🔂  | Idempotency via Redis + idempotent sinks (exactly-once _effect_)          | 8       |
+| 📦  | Transactional outbox and CDC integration                                  | 11      |
+| 📊  | Prometheus metrics, Grafana dashboards, OpenTelemetry tracing             | 12      |
+| 🔐  | JWT / API keys, RBAC, Kafka ACLs, per-tenant quotas                       | 13      |
+| ⏰  | Delayed, scheduled and priority events; signed webhooks                   | 14      |
 
 ---
 
@@ -109,14 +109,14 @@ pnpm dev               # start all services
 pnpm verify            # format + lint + typecheck + test
 ```
 
-| Service | URL |
-|---|---|
-| Gateway API | http://localhost:3000 |
+| Service      | URL                        |
+| ------------ | -------------------------- |
+| Gateway API  | http://localhost:3000      |
 | OpenAPI docs | http://localhost:3000/docs |
-| Kafka UI | http://localhost:8080 |
-| Grafana | http://localhost:3001 |
-| Jaeger | http://localhost:16686 |
-| Prometheus | http://localhost:9090 |
+| Kafka UI     | http://localhost:8080      |
+| Grafana      | http://localhost:3001      |
+| Jaeger       | http://localhost:16686     |
+| Prometheus   | http://localhost:9090      |
 
 _Infrastructure lands in Chapter 1; these commands become live then._
 
@@ -137,12 +137,12 @@ tools/         topic bootstrap, codegen, seed scripts
 
 ## Documentation
 
-| Document | Contents |
-|---|---|
-| [System Architecture](./docs/hld/01-system-architecture.md) | Requirements, capacity model, all diagrams, failure matrix |
-| [ADRs](./docs/adr/README.md) | Eight decisions with alternatives rejected and costs accepted |
-| [Roadmap](./docs/ROADMAP.md) | 18 chapters, dependency graph, requirement coverage |
-| [Changelog](./CHANGELOG.md) | Keep a Changelog, semantic versioning |
+| Document                                                    | Contents                                                      |
+| ----------------------------------------------------------- | ------------------------------------------------------------- |
+| [System Architecture](./docs/hld/01-system-architecture.md) | Requirements, capacity model, all diagrams, failure matrix    |
+| [ADRs](./docs/adr/README.md)                                | Eight decisions with alternatives rejected and costs accepted |
+| [Roadmap](./docs/ROADMAP.md)                                | 18 chapters, dependency graph, requirement coverage           |
+| [Changelog](./CHANGELOG.md)                                 | Keep a Changelog, semantic versioning                         |
 
 ---
 
@@ -150,10 +150,10 @@ tools/         topic bootstrap, codegen, seed scripts
 
 _Placeholders — populated as each chapter lands._
 
-| | |
-|---|---|
+|                                                           |                                                    |
+| --------------------------------------------------------- | -------------------------------------------------- |
 | ![Grafana overview](./docs/assets/screenshot-grafana.png) | ![DLQ inspector](./docs/assets/screenshot-dlq.png) |
-| Grafana — throughput, lag, retry tiers | Ops console — DLQ inspection and redrive |
+| Grafana — throughput, lag, retry tiers                    | Ops console — DLQ inspection and redrive           |
 
 ---
 

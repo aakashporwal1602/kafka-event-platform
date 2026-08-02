@@ -41,24 +41,26 @@ before processing.
 
 ## Alternatives considered
 
-| Option | Why rejected |
-|---|---|
-| **In-place retry with sleep** | Blocks the partition. Also risks exceeding `max.poll.interval.ms`, which triggers a rebalance and makes the problem dramatically worse |
-| **`pause()` + reprocess** | Still blocks that partition; only defers the problem |
-| **Single retry topic with delay header** | The consumer must either sleep for the longest delay (blocking again) or repeatedly re-publish, which produces churn and loses attempt ordering |
-| **External scheduler (Redis ZSET / Quartz)** | Workable and we use a variant for *delayed events* (Ch 14), but for retries it moves durability out of Kafka and adds a component that can lose messages |
-| **Infinite retry** | Guarantees a poison message loops forever, consuming capacity indefinitely |
+| Option                                       | Why rejected                                                                                                                                             |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **In-place retry with sleep**                | Blocks the partition. Also risks exceeding `max.poll.interval.ms`, which triggers a rebalance and makes the problem dramatically worse                   |
+| **`pause()` + reprocess**                    | Still blocks that partition; only defers the problem                                                                                                     |
+| **Single retry topic with delay header**     | The consumer must either sleep for the longest delay (blocking again) or repeatedly re-publish, which produces churn and loses attempt ordering          |
+| **External scheduler (Redis ZSET / Quartz)** | Workable and we use a variant for _delayed events_ (Ch 14), but for retries it moves durability out of Kafka and adds a component that can lose messages |
+| **Infinite retry**                           | Guarantees a poison message loops forever, consuming capacity indefinitely                                                                               |
 
 ## Consequences
 
 **Positive**
+
 - No head-of-line blocking, ever.
 - Per-tier lag metrics give precise operational visibility.
 - Retry capacity is isolated from primary consumption capacity.
 
 **Negative / accepted costs**
+
 - **Ordering is not preserved across a retry.** A message that fails and is retried will be processed
-  *after* messages that came behind it. This is the fundamental trade-off, and it is acceptable
+  _after_ messages that came behind it. This is the fundamental trade-off, and it is acceptable
   because our consumers are idempotent and order-tolerant per ADR-0008. Where strict ordering matters,
   the handler must fail the partition deliberately — documented as an escape hatch.
 - More topics to manage (4 retry tiers + 1 DLQ per domain). Mitigated by automated topic provisioning.
@@ -66,6 +68,7 @@ before processing.
 - Attempt count and original metadata must be propagated in headers, and every hop must preserve them.
 
 **Neutral**
+
 - Total retry window is 5s + 30s + 5m + 1h ≈ 1h 5m before DLQ — tunable per topic.
 
 ## Revisit when
