@@ -20,7 +20,10 @@
 import { Kafka, type Admin } from 'kafkajs';
 import { TOPICS } from './topics.config.js';
 
-const BROKERS = (process.env.KAFKA_BROKERS ?? 'localhost:19092,localhost:19093,localhost:19094')
+// See bootstrap-topics.ts — bracket access required by
+// noPropertyAccessFromIndexSignature, which turns env-var typos into
+// compile errors rather than silent undefined.
+const BROKERS = (process.env['KAFKA_BROKERS'] ?? 'localhost:19092,localhost:19093,localhost:19094')
   .split(',')
   .map((b) => b.trim());
 

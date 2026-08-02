@@ -20,7 +20,11 @@
 import { Kafka, type Admin, type ITopicConfig } from 'kafkajs';
 import { TOPICS, type TopicDefinition } from './topics.config.js';
 
-const BROKERS = (process.env.KAFKA_BROKERS ?? 'localhost:19092,localhost:19093,localhost:19094')
+// Bracket access is required: `process.env` is an index signature, and
+// noPropertyAccessFromIndexSignature makes dot access an error. The rule exists
+// so a typo like process.env.KAKFA_BROKERS fails at compile time instead of
+// silently resolving to undefined at runtime.
+const BROKERS = (process.env['KAFKA_BROKERS'] ?? 'localhost:19092,localhost:19093,localhost:19094')
   .split(',')
   .map((b) => b.trim());
 
