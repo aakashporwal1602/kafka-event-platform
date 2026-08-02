@@ -14,9 +14,11 @@ export default tseslint.config(
     languageOptions: {
       parserOptions: {
         projectService: {
-          // Root-level config files belong to no workspace project. Without
-          // this, type-aware linting errors with "file not found in any
-          // tsconfig" on the very files that configure the tooling.
+          // Root-level config files belong to no workspace tsconfig. This lets
+          // the parser handle them via an inferred project. Note that inferred
+          // projects use TypeScript's DEFAULT compiler options — no
+          // strictNullChecks — so type-aware rules are switched off for these
+          // files further down rather than run against a weaker type model.
           allowDefaultProject: ['eslint.config.js', 'vitest.config.ts'],
         },
         tsconfigRootDir: import.meta.dirname,
@@ -66,6 +68,16 @@ export default tseslint.config(
   {
     // Tooling scripts are allowed to print.
     files: ['tools/**/*.ts'],
+    rules: { 'no-console': 'off' },
+  },
+  {
+    // Build/tool configuration files: syntax and correctness linting only.
+    // Type-aware rules are disabled because these files live in an inferred
+    // project without our strict compiler options, which produces false
+    // positives (prefer-nullish-coalescing demanding strictNullChecks) and
+    // unresolvable-type errors on plugin imports.
+    files: ['eslint.config.js', 'vitest.config.ts', '**/*.config.js'],
+    extends: [tseslint.configs.disableTypeChecked],
     rules: { 'no-console': 'off' },
   },
   prettier,

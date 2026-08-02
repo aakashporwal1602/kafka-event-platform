@@ -1,7 +1,8 @@
 {
   "name": "kafka-event-platform",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
+  "type": "module",
   "description": "A production-grade internal event streaming platform built on Apache Kafka — reliable publish/consume, schema governance, tiered retries, DLQ, replay, and full observability.",
   "author": "Aakash Porwal <aakashporwal111@gmail.com>",
   "license": "MIT",

@@ -1,0 +1,110 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# A new push to the same branch cancels the previous run. Without this, a
+# rapid series of pushes queues runs that are already obsolete.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Fail the build on any dependency warning noise; keeps logs readable.
+  CI: true
+
+jobs:
+  verify:
+    name: Verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # pnpm/action-setup reads the `packageManager` field in package.json, so
+      # CI uses the exact same pnpm version as local development. Version skew
+      # between CI and dev is a classic source of "works on my machine".
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Each step runs separately rather than via `pnpm verify` so that a
+      # failure annotates the correct step in the GitHub UI instead of
+      # collapsing into one opaque red cross.
+      - name: Format check
+        run: pnpm format:check
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Unit tests
+        run: pnpm test
+
+  # Validates the Docker Compose stack parses and that topic provisioning is
+  # internally consistent. Full integration tests against live containers are
+  # added in Chapter 15.
+  infra:
+    name: Infrastructure
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate Compose file
+        run: docker compose -f infra/docker/docker-compose.yml config --quiet
+
+      - name: Validate Prometheus rules
+        run: |
+          docker run --rm -v "$PWD/infra/prometheus:/etc/prometheus" \
+            --entrypoint promtool prom/prometheus:latest \
+            check rules /etc/prometheus/rules/kafka-alerts.yml
+
+  # Enforces Conventional Commits on PR titles. The title becomes the merge
+  # commit subject, so an unstructured title pollutes the history the whole
+  # project is trying to keep clean.
+  commit-lint:
+    name: Commit convention
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    timeout-minutes: 2
+
+    steps:
+      - name: Check PR title
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            perf
+            test
+            build
+            ci
+            chore
+            revert
+          requireScope: false
+          subjectPattern: ^(?![A-Z]).+$
+          subjectPatternError: |
+            The subject "{subject}" must start with a lowercase letter.

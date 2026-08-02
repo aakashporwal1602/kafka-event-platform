@@ -97,8 +97,11 @@ A chapter is complete only when **all** of these hold:
 - [ ] `CHANGELOG.md` updated under a new version heading
 - [ ] This roadmap updated
 - [ ] One or more Conventional Commits, each a logical milestone
+- [ ] Chapter branch merged to `main` via PR with CI green
+- [ ] Version tag pushed
 
-Shortcut: `pnpm verify` runs the first four.
+Shortcut: `pnpm verify` runs the first four. Branch and PR conventions are in
+[CONTRIBUTING.md](../CONTRIBUTING.md).
 
 ---
 

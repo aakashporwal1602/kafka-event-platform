@@ -5,6 +5,7 @@
 **A production-grade internal event platform** — reliable publish/consume, schema governance,
 non-blocking retries, dead-letter queues, replay, idempotency and full observability.
 
+[![CI](https://github.com/aakashporwal1602/kafka-event-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/aakashporwal1602/kafka-event-platform/actions/workflows/ci.yml)
 [![Node](https://img.shields.io/badge/node-22.x-339933?logo=node.js&logoColor=white)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/typescript-5.6-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Kafka](https://img.shields.io/badge/kafka-KRaft-231F20?logo=apachekafka)](https://kafka.apache.org)
@@ -142,6 +143,7 @@ tools/         topic bootstrap, codegen, seed scripts
 | [System Architecture](./docs/hld/01-system-architecture.md) | Requirements, capacity model, all diagrams, failure matrix    |
 | [ADRs](./docs/adr/README.md)                                | Eight decisions with alternatives rejected and costs accepted |
 | [Roadmap](./docs/ROADMAP.md)                                | 18 chapters, dependency graph, requirement coverage           |
+| [Contributing](./CONTRIBUTING.md)                           | Branch strategy, commit conventions, definition of done       |
 | [Changelog](./CHANGELOG.md)                                 | Keep a Changelog, semantic versioning                         |
 
 ---
