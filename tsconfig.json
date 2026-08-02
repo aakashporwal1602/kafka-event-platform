@@ -5,5 +5,5 @@
   //
   // Every new package/app adds a reference here.
   "files": [],
-  "references": [{ "path": "./tools" }]
+  "references": [{ "path": "./packages/core" }, { "path": "./tools" }]
 }
