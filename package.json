@@ -27,7 +27,9 @@
     "infra:down": "docker compose -f infra/docker/docker-compose.yml down",
     "infra:logs": "docker compose -f infra/docker/docker-compose.yml logs -f",
     "infra:nuke": "docker compose -f infra/docker/docker-compose.yml down -v",
-    "topics:bootstrap": "tsx tools/bootstrap-topics.ts",
+    "topics:bootstrap": "pnpm --filter @platform/tools topics:bootstrap",
+    "topics:plan": "pnpm --filter @platform/tools topics:plan",
+    "cluster:verify": "pnpm --filter @platform/tools cluster:verify",
     "verify": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test",
     "prepare": "husky || true"
   },

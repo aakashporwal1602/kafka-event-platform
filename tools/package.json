@@ -1,0 +1,20 @@
+{
+  "name": "@platform/tools",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Operational tooling — topic provisioning, cluster verification, codegen",
+  "scripts": {
+    "topics:bootstrap": "tsx bootstrap-topics.ts",
+    "topics:plan": "tsx bootstrap-topics.ts --dry-run --prune",
+    "cluster:verify": "tsx verify-cluster.ts",
+    "build": "tsc -b"
+  },
+  "dependencies": {
+    "kafkajs": "^2.2.4"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.3"
+  }
+}
