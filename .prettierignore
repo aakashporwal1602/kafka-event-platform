@@ -1,0 +1,8 @@
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+pnpm-lock.yaml
+infra/grafana/dashboards/*.json
+packages/contracts/generated/
+docs/api/openapi.generated.json

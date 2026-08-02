@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+
+# Test & coverage
+coverage/
+.nyc_output/
+test-results/
+
+# Environment — never commit real credentials
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Editors
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local infra state
+infra/docker/data/
+infra/docker/.volumes/
+
+# Generated artefacts
+docs/api/openapi.generated.json
+packages/contracts/generated/
