@@ -6,6 +6,49 @@ the deliverable.
 
 ---
 
+## The review standard
+
+This project is written to be read by senior and staff engineers. The bar is not
+"does it work" — it is **"can a reviewer reconstruct why it is this way without
+asking anyone"**.
+
+Every non-trivial decision must carry four things:
+
+|     | Requirement                                            | Where it lives                           |
+| --- | ------------------------------------------------------ | ---------------------------------------- |
+| 1   | **The alternative that was rejected, and why**         | ADR, or a comment at the decision site   |
+| 2   | **The cost being accepted** — every choice has one     | ADR "Consequences", or the comment       |
+| 3   | **The scale at which it stops working**                | Code comment or the relevant HLD section |
+| 4   | **The failure mode** — what breaks, how it is detected | HLD failure table, runbook, or test name |
+
+A comment that restates the code (`// increment the counter`) is noise. A comment
+that explains a decision (`// bounded queue: an unbounded one turns overload into
+an OOM with no backpressure signal`) is the product.
+
+### The test
+
+Before opening a PR, read the diff as if you did not write it and ask:
+
+- Could a reviewer challenge this choice and would the code answer them?
+- Is there a number anywhere — a threshold, a size, a timeout — that is not
+  derived from something?
+- Does anything here silently degrade rather than fail loudly?
+- What happens to this at 100× the current load?
+
+If the answer to any of those is unsatisfying, the code is not done.
+
+### Explicitly not wanted
+
+- Cargo-culted patterns. If a design pattern appears, the comment says which
+  force required it — not its name.
+- Defensive abstraction. An interface with one implementation and no stated
+  second is cost with no benefit. Say so out loud rather than adding it.
+- Numbers without derivation. `partitions: 12` is meaningless; `12` derived from
+  throughput and consumer parallelism, with the divisibility argument, is a
+  decision.
+
+---
+
 ## Branch strategy
 
 `main` is always green and always deployable. Nothing is committed to it directly.
