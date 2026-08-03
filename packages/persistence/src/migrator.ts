@@ -51,6 +51,18 @@ import type { Pool, PoolClient } from 'pg';
  */
 const MIGRATION_LOCK_ID = 8_472_910_364_155n;
 
+/**
+ * Absolute path to this package's migrations.
+ *
+ * Exported so callers never compute it themselves. A relative path from an
+ * app is wrong the moment that app runs from `dist/` instead of `src/`, and
+ * the failure — "no migrations found" — looks exactly like an empty directory
+ * rather than like a resolution bug.
+ */
+export function migrationsDir(): string {
+  return new URL('../migrations/', import.meta.url).pathname;
+}
+
 export interface Migration {
   readonly filename: string;
   readonly sql: string;

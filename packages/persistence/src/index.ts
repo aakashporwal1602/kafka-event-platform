@@ -17,6 +17,7 @@ export {
   MigrationChecksumError,
   loadMigrations,
   migrate,
+  migrationsDir,
   pendingMigrations,
   type Migration,
   type MigrationResult,
