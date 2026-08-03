@@ -56,18 +56,14 @@ export {
 } from './unit-of-work.js';
 
 /**
- * Repository interfaces are exported separately from their implementations.
- * When `@platform/domain` arrives in Chapter 4 the interfaces move there and
- * only the second block below remains — see the note at the top of
- * `repositories/outbox.repository.ts`.
+ * Repository interfaces are NOT re-exported from here.
+ *
+ * They live in `@platform/domain` (ADR-0010) and consumers must import them
+ * from there. Re-exporting would make `import type { OutboxRepository } from
+ * '@platform/persistence'` compile, and a service that does that has taken a
+ * dependency on the persistence layer to describe a domain concept — which is
+ * the coupling the split exists to prevent, reintroduced by a convenience.
  */
-export type {
-  NewOutboxEvent,
-  OutboxRecord,
-  OutboxRepository,
-  PublishOutcome,
-} from './repositories/outbox.repository.js';
-
 export {
   PostgresOutboxRepository,
   type PostgresOutboxRepositoryOptions,

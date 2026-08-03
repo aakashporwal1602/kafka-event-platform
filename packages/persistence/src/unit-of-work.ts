@@ -44,7 +44,7 @@ import {
   PostgresOutboxRepository,
   type RelayShard,
 } from './repositories/postgres-outbox.repository.js';
-import type { OutboxRepository } from './repositories/outbox.repository.js';
+import type { OutboxRepository } from '@platform/domain';
 
 /**
  * The repositories available inside a transaction.

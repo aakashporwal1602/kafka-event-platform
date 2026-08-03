@@ -8,13 +8,13 @@
  * `unit-of-work.ts`.
  */
 
-import type { Queryable } from '../postgres.js';
 import type {
   NewOutboxEvent,
   OutboxRecord,
   OutboxRepository,
   PublishOutcome,
-} from './outbox.repository.js';
+} from '@platform/domain';
+import type { Queryable } from '../postgres.js';
 
 /**
  * Postgres' wire protocol length-prefixes the parameter count as an **int16**,

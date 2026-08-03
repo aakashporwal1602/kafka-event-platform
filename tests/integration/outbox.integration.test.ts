@@ -7,13 +7,12 @@
  */
 
 import { RecordingLogger } from '@platform/core';
+import type { NewOutboxEvent, OutboxRecord } from '@platform/domain';
 import {
   Postgres,
   PostgresOutboxRepository,
   PostgresUnitOfWork,
   migrate,
-  type NewOutboxEvent,
-  type OutboxRecord,
 } from '@platform/persistence';
 import type { StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';

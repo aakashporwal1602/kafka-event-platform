@@ -16,7 +16,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Queryable } from '../postgres.js';
 import { PostgresOutboxRepository, type RelayShard } from './postgres-outbox.repository.js';
-import type { NewOutboxEvent } from './outbox.repository.js';
+import type { NewOutboxEvent } from '@platform/domain';
 
 interface Call {
   sql: string;

@@ -1,16 +1,19 @@
 /**
  * Outbox repository — the interface.
  *
- * ── Why the interface is a separate file from the implementation ───────────
- * ADR-0010 says repository interfaces are owned by the domain and
- * implementations live here. `@platform/domain` does not exist yet — it arrives
- * with the producer in Chapter 4 — so the interface temporarily lives in this
- * package. Keeping it in its own file means that move is a `git mv`, not
- * surgery on a file that also contains SQL.
+ * ── Why the interface lives here and not next to the SQL ───────────────────
+ * ADR-0010: repository interfaces are owned by the domain, implementations
+ * live in `@platform/persistence`. The dependency therefore points *inwards* —
+ * persistence knows about the domain, the domain knows nothing about `pg`.
  *
- * The rule that must survive the move: **this file may not import `pg`.** If it
- * ever needs to, the abstraction has failed and the domain has become coupled
- * to the driver, which is the specific outcome ADR-0010 exists to prevent.
+ * It was written in the persistence package in Chapter 3 because this package
+ * did not exist yet, and kept in its own file precisely so the move would be a
+ * `git mv` rather than surgery on a file that also contained SQL.
+ *
+ * The rule this file must keep: **it may not import `pg`, `ioredis`, or
+ * anything else with a driver in it.** If it ever needs to, the abstraction has
+ * failed and the domain has become coupled to a vendor, which is the exact
+ * outcome ADR-0010 exists to prevent.
  *
  * ── What the outbox is for ─────────────────────────────────────────────────
  * The dual-write problem (ADR-0007): a service that updates its database and
