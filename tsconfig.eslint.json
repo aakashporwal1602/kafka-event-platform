@@ -38,6 +38,8 @@
     // linting it from `tests/` fails on a clean checkout.
     "paths": {
       "@platform/core": ["./packages/core/src/index.ts"],
+      "@platform/domain": ["./packages/domain/src/index.ts"],
+      "@platform/kafka": ["./packages/kafka/src/index.ts"],
       "@platform/persistence": ["./packages/persistence/src/index.ts"]
     }
   },
