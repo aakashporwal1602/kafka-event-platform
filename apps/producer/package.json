@@ -1,0 +1,26 @@
+{
+  "name": "@platform/producer",
+  "version": "0.5.0",
+  "private": true,
+  "type": "module",
+  "description": "Producer service — the outbox relay that publishes committed events to Kafka",
+  "main": "./dist/main.js",
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "rm -rf dist *.tsbuildinfo",
+    "dev": "tsx watch src/main.ts",
+    "start": "node dist/main.js"
+  },
+  "dependencies": {
+    "@platform/core": "workspace:*",
+    "@platform/domain": "workspace:*",
+    "@platform/kafka": "workspace:*",
+    "@platform/persistence": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.5",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.3"
+  }
+}

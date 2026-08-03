@@ -40,6 +40,7 @@
       "@platform/core": ["./packages/core/src/index.ts"],
       "@platform/domain": ["./packages/domain/src/index.ts"],
       "@platform/kafka": ["./packages/kafka/src/index.ts"],
+      "@platform/producer": ["./apps/producer/src/main.ts"],
       "@platform/persistence": ["./packages/persistence/src/index.ts"]
     }
   },

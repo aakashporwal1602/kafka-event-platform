@@ -6,6 +6,7 @@
   // Every new package/app adds a reference here.
   "files": [],
   "references": [
+    { "path": "./apps/producer" },
     { "path": "./packages/core" },
     { "path": "./packages/domain" },
     { "path": "./packages/kafka" },
