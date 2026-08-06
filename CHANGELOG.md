@@ -14,6 +14,73 @@ _Nothing yet._
 
 ---
 
+## [0.4.0] — 2026-08-02
+
+**Chapter 3 — Data Layer (PostgreSQL + Redis)**
+
+### Added
+
+- **`@platform/persistence`** — every line that touches Postgres or Redis, so
+  nothing above this layer imports `pg` or `ioredis`
+  - **Initial schema** — 10 tables, 6 partitions, 19 indexes, 14 CHECK
+    constraints. `timestamptz` throughout (a `timestamp` column silently drops
+    the offset and every duration crossing a DST boundary is wrong), text +
+    CHECK instead of enum types (adding a value to a PG enum cannot be done in
+    a transaction with other DDL), `jsonb` not `json`, partial indexes for the
+    outbox backlog, monthly range partitioning for the append-heavy log tables
+  - **Migration runner** — session-level advisory lock so N pods in a rolling
+    deploy do not race; SHA-256 checksums so editing an applied migration is a
+    named startup failure instead of silent schema divergence across
+    environments; DDL and bookkeeping row commit together, which works only
+    because Postgres has transactional DDL. No down migrations — a rollback
+    that drops a column destroys everything written since the deploy
+  - **Connection pool** — sizing derived from `max_connections` ÷ replicas
+    rather than guessed, `statement_timeout` and
+    `idle_in_transaction_session_timeout` set, SQLSTATE-based error translation
+    that decides retryable vs permanent at the boundary, and a `serializable`
+    helper with bounded retry (SSI aborts at commit, so retry is mandatory —
+    code that omits it loses writes under contention)
+  - **Redis key design** — 6 key families, a TTL on every one, and derived
+    memory arithmetic showing 24h × 10K events/sec exceeds a single node.
+    A test asserts the arithmetic so the comment cannot go stale
+  - **Redis client** — an eleven-command surface. `KEYS` and `FLUSHDB` are
+    absent by construction; `enableOfflineQueue: false` because a buffered lock
+    acquisition that lands seconds late is a correctness bug, not a slow success
+  - **Distributed lock with fencing tokens** — Lua for acquire, release and
+    extend, because Redis executing a script atomically is the only reason
+    check-then-act is safe. Release is compare-and-delete: a bare `DEL` after a
+    lease expiry frees somebody else's lock and turns one slow holder into a
+    cascade
+  - **Repository interfaces + Unit of Work** — repositories are constructed
+    **per transaction** and handed to the callback, so the enlistment mistake
+    (a pool-bound repository committing on its own inside someone else's
+    transaction) has no call site at which it can be written
+  - **Outbox repository** — `FOR UPDATE SKIP LOCKED` claiming, batch insert
+    bounded by Postgres' 65,535-parameter protocol limit, `unnest`-based batch
+    publish marking, and optional relay sharding on `hashtext(aggregate_id)` so
+    events for one aggregate keep their order when N relays drain the table
+- **ADR-0010** — repository pattern over an ORM
+- **ADR-0011** — single-node Redis lock with fencing tokens, not Redlock
+- **`docs/lld/02-data-layer.md`** — module map, the two-guarantees table,
+  relay sequence, fencing failure mode, error-translation table, known limits
+- **Testcontainers integration suite** — `vitest.integration.config.ts` plus
+  real Postgres and Redis. Covers what only a database can prove: `SKIP LOCKED`
+  handing disjoint rows to concurrent claimers, transactional DDL rolling a
+  failed migration back, advisory locks serialising concurrent runners,
+  `SET NX` admitting exactly one of twenty contenders, fencing tokens staying
+  monotonic across a lease expiry
+- **CI `integration` job** — separate from `verify` so a container failure is
+  distinguishable at a glance from a lint failure
+
+### Changed
+
+- `tsconfig.eslint.json` now carries project references, so `@platform/*`
+  imports resolve to source during linting. Without them, linting a clean
+  checkout fails because `dist` does not exist yet and every type-aware rule
+  reports `any` — a failure that appears only in CI and only on the first run
+
+---
+
 ## [0.3.0] — 2026-08-02
 
 **Chapter 2 — Shared Core Library**
