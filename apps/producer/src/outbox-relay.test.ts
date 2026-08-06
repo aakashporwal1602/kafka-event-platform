@@ -45,7 +45,13 @@ interface Harness {
   toClaim: OutboxRecord[][];
   marked: PublishOutcome[];
   publishError?: Error;
-  publishReturns?: number;
+  /**
+   * How many PARTITIONS the broker's response covers — not how many messages.
+   * Kafka returns one RecordMetadata per partition touched, with baseOffset
+   * being that partition's first record in the request. Defaults to 1, the
+   * common case for a keyed batch about one aggregate.
+   */
+  partitionsInResponse?: number;
 }
 
 function build(h: Harness) {
@@ -84,9 +90,13 @@ function build(h: Harness) {
     ): Promise<PublishResult[]> => {
       h.steps.push({ type: 'publish', detail: `${topic}:${envelopes.length}` });
       if (h.publishError) return Promise.reject(h.publishError);
-      const count = h.publishReturns ?? envelopes.length;
+      const partitions = h.partitionsInResponse ?? 1;
       return Promise.resolve(
-        Array.from({ length: count }, (_, i) => ({ topic, partition: 1, offset: BigInt(100 + i) })),
+        Array.from({ length: partitions }, (_, i) => ({
+          topic,
+          partition: i + 1,
+          offset: BigInt(100),
+        })),
       );
     },
   };
@@ -133,6 +143,9 @@ describe('the tick', () => {
 
     await relay.tick();
 
+    // One result for two messages, because they share a partition. Offsets are
+    // derived as baseOffset + position, which is how Kafka assigns them within
+    // a partition for one request.
     expect(h.marked).toEqual([
       { id: 7n, partition: 1, offset: 100n },
       { id: 8n, partition: 1, offset: 101n },
@@ -160,21 +173,32 @@ describe('the tick', () => {
     ]);
   });
 
-  it('rolls back rather than attributing offsets it cannot trust', async () => {
-    // The broker returned fewer results than messages sent. Results are zipped
-    // by index because nothing echoes an id back, so a length mismatch means
-    // offsets would be recorded against the wrong events.
+  it('records location as unknown when the batch spanned partitions', async () => {
+    // Two partitions in the response, and nothing says which message went to
+    // which — answering that means reimplementing the broker's partitioner,
+    // which would then drift from it silently.
     const h: Harness = {
       steps: [],
       toClaim: [[record(1n), record(2n), record(3n)]],
       marked: [],
-      publishReturns: 2,
+      partitionsInResponse: 2,
     };
     const { relay } = build(h);
 
-    await expect(relay.tick()).rejects.toThrow(/offsets cannot be attributed/);
-    expect(h.marked).toEqual([]);
-    expect(h.steps.at(-1)?.type).toBe('rollback');
+    const result = await relay.tick();
+
+    // Still published and still committed: published_at is what makes the
+    // outbox correct, and the events ARE on the broker. Only the location — a
+    // support convenience — is missing, and it is recorded as unknown rather
+    // than guessed. A wrong offset in a support tool is worse than a missing
+    // one, because somebody will trust it.
+    expect(result).toMatchObject({ claimed: 3, published: 3 });
+    expect(h.steps.at(-1)?.type).toBe('commit');
+    expect(h.marked).toEqual([
+      { id: 1n, partition: -1, offset: 0n },
+      { id: 2n, partition: -1, offset: 0n },
+      { id: 3n, partition: -1, offset: 0n },
+    ]);
   });
 
   it('rolls back when the publish fails, leaving the rows unpublished', async () => {

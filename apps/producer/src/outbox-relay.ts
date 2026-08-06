@@ -144,23 +144,27 @@ export class OutboxRelay {
           records.map((record) => toEnvelope(record)),
         );
 
-        // Zipped by index. KafkaJS returns one metadata record per message in
-        // submission order, which is the only correlation available — there is
-        // no id echoed back. If that ever stops holding, offsets are recorded
-        // against the wrong events, so the invariant is asserted rather than
-        // assumed.
-        if (results.length !== records.length) {
-          throw new Error(
-            `Broker returned ${results.length} results for ${records.length} messages on ` +
-              `"${topic}"; offsets cannot be attributed and this batch is being rolled back.`,
-          );
-        }
+        // ── Offset attribution, and its honest limit ────────────────────
+        // Kafka returns one RecordMetadata per **partition touched**, not per
+        // message: `baseOffset` is the offset of that partition's first record
+        // in this request. There is no id echoed back, so with several
+        // partitions in one response nothing says which message went where —
+        // reproducing the answer would mean reimplementing the broker's
+        // partitioner, which would then silently drift from it.
+        //
+        // Publication itself is unaffected: the events are on the broker and
+        // `published_at` is what makes the outbox correct. Only the recorded
+        // *location* — a support convenience — is unavailable, and it is
+        // recorded as unknown rather than guessed. A wrong offset in a support
+        // tool is worse than a missing one, because somebody will trust it.
+        const single = results.length === 1 ? results[0] : undefined;
 
         await u.outbox.markPublished(
           records.map((record, index) => ({
             id: record.id,
-            partition: results[index]?.partition ?? -1,
-            offset: results[index]?.offset ?? 0n,
+            // -1 and 0 are the sentinels for "published, location unknown".
+            partition: single?.partition ?? -1,
+            offset: single === undefined ? 0n : single.offset + BigInt(index),
           })),
         );
         publishedCount += records.length;
