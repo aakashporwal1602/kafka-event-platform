@@ -42,8 +42,15 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await redis.close();
-  await container.stop();
+  // Optional chaining throughout, because these are only assigned once beforeAll
+  // has succeeded. When container startup fails — no Docker daemon, an image pull
+  // timeout — the fixtures are undefined and an unguarded teardown throws a
+  // second, unrelated TypeError. Vitest then reports two failures per suite and
+  // the one that matters is the one nobody reads.
+  //
+  // Teardown must never be the loudest thing in a failing run.
+  await redis?.close();
+  await container?.stop();
 });
 
 /** Unique per test, so tests never contend with each other. */

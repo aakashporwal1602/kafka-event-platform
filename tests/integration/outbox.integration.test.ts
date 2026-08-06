@@ -31,8 +31,10 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await postgres.close();
-  await container.stop();
+  // See lock.integration.test.ts: guarded so a failed startup reports one
+  // failure, not two.
+  await postgres?.close();
+  await container?.stop();
 });
 
 beforeEach(async () => {
@@ -355,10 +357,28 @@ describe('query paths', () => {
     await postgres.query('UPDATE outbox SET published_at = now() WHERE id > 2');
     await postgres.query('ANALYZE outbox');
 
-    const { rows } = await postgres.query<{ 'QUERY PLAN': string }>(
-      `EXPLAIN SELECT count(*) FROM outbox WHERE published_at IS NULL`,
-    );
-    const plan = rows.map((r) => r['QUERY PLAN']).join('\n');
+    // enable_seqscan off, because at 20 rows the planner is *correct* to scan
+    // sequentially — an index adds a page read to save nothing. Asserting the
+    // plan without this tests the planner's cost model rather than our schema,
+    // and would flip on any Postgres version that retunes it.
+    //
+    // The question worth asking is whether the partial index is USABLE for this
+    // predicate: that its WHERE clause matches and its column list permits an
+    // index-only scan. Disabling the alternative is how you ask it.
+    //
+    // SET LOCAL inside a transaction, not SET on the pool. `SET` is
+    // session-scoped, and `postgres.query` borrows an arbitrary pooled
+    // connection each call — so the setting and the EXPLAIN could land on
+    // different sessions, making the test pass or fail depending on pool
+    // scheduling. SET LOCAL also reverts on commit, so no reset is needed and
+    // no other test can inherit it.
+    const plan = await postgres.transaction(async (tx) => {
+      await tx.query('SET LOCAL enable_seqscan = off');
+      const { rows } = await tx.query<{ 'QUERY PLAN': string }>(
+        `EXPLAIN SELECT count(*) FROM outbox WHERE published_at IS NULL`,
+      );
+      return rows.map((r) => r['QUERY PLAN']).join('\n');
+    });
 
     // The metric this backs is polled every few seconds forever. If it ever
     // becomes a sequential scan over a 100M-row table, the alert that watches

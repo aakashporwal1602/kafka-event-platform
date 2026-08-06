@@ -32,8 +32,10 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await postgres.close();
-  await container.stop();
+  // See lock.integration.test.ts: guarded so a failed startup reports one
+  // failure, not two.
+  await postgres?.close();
+  await container?.stop();
 });
 
 beforeEach(async () => {
