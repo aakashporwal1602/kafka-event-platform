@@ -14,6 +14,67 @@ _Nothing yet._
 
 ---
 
+## [0.5.0] — 2026-08-03
+
+**Chapter 4 — Producer Service**
+
+### Added
+
+- **`@platform/domain`** — the event contract, with one dependency
+  (`@platform/core`) and no knowledge of any driver. That constraint is what
+  lets the retry engine, DLQ and replay service operate on envelopes and be
+  written once
+  - **Event envelope** separating metadata from payload, mirrored into Kafka
+    headers so a DLQ message stays triageable when its payload is exactly what
+    cannot be parsed
+  - **Two timestamps** — `occurredAt` (the fact) and `recordedAt` (the record).
+    They differ by days when a mobile client syncs late, and a system with one
+    field has to choose which question it answers wrongly
+  - **Event-type grammar** enforced by regex. Past tense, because an event is a
+    fact that cannot be refused and an imperative name invites a consumer to
+    treat it as a command it may decline
+  - **Idempotency keys** derived from business meaning, length-prefixed before
+    hashing. A separator-joined key makes `("agg b", "c")` and `("agg", "b c")`
+    collide, silently dropping one of two distinct events
+  - **Topic naming and partition keys** — prefix-first so Kafka ACLs and metric
+    selectors can match; keyed by aggregate because that is the only scope in
+    which Kafka orders anything
+- **`@platform/kafka`** — the only file in the repository that imports
+  `kafkajs`, which is what keeps ADR-0004's reversibility claim true
+  - **Idempotent producer**, `acks=-1`, five in-flight requests. The three are
+    one decision: idempotence is what makes a produce timeout safely retryable,
+    and what makes >1 in flight ordering-safe
+  - **Error translation** on numeric broker codes rather than driver strings.
+    `OutOfOrderSequenceNumber` is fatal, not retryable — only recreating the
+    producer recovers it, and a naive retry loop spins forever
+- **`@platform/producer`** — the outbox relay and the composition root
+  - Publishes **inside** the claiming transaction, because `SKIP LOCKED` works
+    through row locks that are the claim; committing first unlocks unpublished
+    rows for a second relay to republish
+  - Publish then mark, never mark then publish. At-least-once is chosen here,
+    in this ordering, and nowhere else
+  - No leader election: a single relay is a throughput ceiling and a failover
+    gap, and `SKIP LOCKED` already makes N relays safe
+- **ADR-0012** — event envelope and versioning
+- **ADR-0013** — idempotent producer settings, amending ADR-0004
+- **End-to-end integration tests** against real Postgres and Kafka: a committed
+  row becomes a record, a rolled-back transaction produces none, headers
+  survive the round trip
+
+### Changed
+
+- Repository interfaces moved from `@platform/persistence` to
+  `@platform/domain` (ADR-0010). Persistence deliberately does not re-export
+  them — that convenience would let a service depend on the persistence layer
+  to describe a domain concept
+- `tools/topics.config.ts` sources topic names from `@platform/domain` instead
+  of its own copy. Two copies of a naming rule agree until one is edited
+- **ADR-0004 amended**: compression is gzip, not lz4. KafkaJS ships only gzip
+  built in, and an lz4 codec reintroduces the install friction that ADR chose
+  KafkaJS to avoid
+
+---
+
 ## [0.4.0] — 2026-08-02
 
 **Chapter 3 — Data Layer (PostgreSQL + Redis)**
