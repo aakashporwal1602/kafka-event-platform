@@ -92,6 +92,7 @@ jobs:
         run: |
           docker pull postgres:16-alpine
           docker pull redis:7-alpine
+          docker pull confluentinc/cp-kafka:7.7.1
 
       - name: Integration tests
         run: pnpm test:integration

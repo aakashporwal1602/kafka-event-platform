@@ -14,9 +14,21 @@ importers:
       '@platform/core':
         specifier: workspace:*
         version: link:packages/core
+      '@platform/domain':
+        specifier: workspace:*
+        version: link:packages/domain
+      '@platform/kafka':
+        specifier: workspace:*
+        version: link:packages/kafka
       '@platform/persistence':
         specifier: workspace:*
         version: link:packages/persistence
+      '@platform/producer':
+        specifier: workspace:*
+        version: link:apps/producer
+      '@testcontainers/kafka':
+        specifier: ^10.13.2
+        version: 10.28.0
       '@testcontainers/postgresql':
         specifier: ^10.13.2
         version: 10.28.0
@@ -41,6 +53,9 @@ importers:
       husky:
         specifier: ^9.1.6
         version: 9.1.7
+      kafkajs:
+        specifier: ^2.2.4
+        version: 2.2.4
       lint-staged:
         specifier: ^15.2.10
         version: 15.5.2
@@ -59,6 +74,34 @@ importers:
       typescript-eslint:
         specifier: ^8.11.0
         version: 8.65.0(eslint@9.39.5)(typescript@5.9.3)
+      vitest:
+        specifier: ^2.1.3
+        version: 2.1.9(@types/node@22.20.1)
+
+  apps/producer:
+    dependencies:
+      '@platform/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@platform/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
+      '@platform/kafka':
+        specifier: workspace:*
+        version: link:../../packages/kafka
+      '@platform/persistence':
+        specifier: workspace:*
+        version: link:../../packages/persistence
+    devDependencies:
+      '@types/node':
+        specifier: ^22.7.5
+        version: 22.20.1
+      tsx:
+        specifier: ^4.19.1
+        version: 4.23.1
+      typescript:
+        specifier: ^5.6.3
+        version: 5.9.3
       vitest:
         specifier: ^2.1.3
         version: 2.1.9(@types/node@22.20.1)
@@ -766,6 +809,9 @@ packages:
 
   '@rtsao/scc@1.1.0':
     resolution: {integrity: sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==}
+
+  '@testcontainers/kafka@10.28.0':
+    resolution: {integrity: sha512-4FxjliTmDf+1UpXxDi2qUQsxXRiMMqBq9sSiazguft7sPvHpZ5Snh/OdW+rBBJ2f8+xF0474LS+57vF+q5M6uw==}
 
   '@testcontainers/postgresql@10.28.0':
     resolution: {integrity: sha512-NN25rruG5D4Q7pCNIJuHwB+G85OSeJ3xHZ2fWx0O6sPoPEfCYwvpj8mq99cyn68nxFkFYZeyrZJtSFO+FnydiA==}
@@ -3063,6 +3109,15 @@ snapshots:
     optional: true
 
   '@rtsao/scc@1.1.0': {}
+
+  '@testcontainers/kafka@10.28.0':
+    dependencies:
+      testcontainers: 10.28.0
+    transitivePeerDependencies:
+      - bare-abort-controller
+      - bare-buffer
+      - react-native-b4a
+      - supports-color
 
   '@testcontainers/postgresql@10.28.0':
     dependencies:

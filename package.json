@@ -1,9 +1,9 @@
 {
   "name": "kafka-event-platform",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "private": true,
   "type": "module",
-  "description": "A production-grade internal event streaming platform built on Apache Kafka — reliable publish/consume, schema governance, tiered retries, DLQ, replay, and full observability.",
+  "description": "A production-grade internal event streaming platform built on Apache Kafka \u2014 reliable publish/consume, schema governance, tiered retries, DLQ, replay, and full observability.",
   "author": "Aakash Porwal <aakashporwal111@gmail.com>",
   "license": "MIT",
   "engines": {
@@ -36,7 +36,11 @@
   "devDependencies": {
     "@eslint/js": "^9.13.0",
     "@platform/core": "workspace:*",
+    "@platform/domain": "workspace:*",
+    "@platform/kafka": "workspace:*",
     "@platform/persistence": "workspace:*",
+    "@platform/producer": "workspace:*",
+    "@testcontainers/kafka": "^10.13.2",
     "@testcontainers/postgresql": "^10.13.2",
     "@testcontainers/redis": "^10.13.2",
     "@types/node": "^22.7.5",
@@ -45,6 +49,7 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.31.0",
     "husky": "^9.1.6",
+    "kafkajs": "^2.2.4",
     "lint-staged": "^15.2.10",
     "prettier": "^3.3.3",
     "testcontainers": "^10.13.2",
