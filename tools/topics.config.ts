@@ -9,6 +9,12 @@
  * Every topic here is reviewed in a pull request like any other change.
  */
 
+// Topic NAMES come from @platform/domain, which is also what producers and
+// consumers resolve at runtime. Two copies of a naming rule agree right up
+// until one of them is edited — and the symptom is a producer writing to a
+// topic this tool never created, on a cluster with auto-creation disabled.
+import { dlqTopic, eventTopic, retryTopic } from '@platform/domain';
+
 export type CleanupPolicy = 'delete' | 'compact' | 'compact,delete';
 
 export interface TopicDefinition {
@@ -70,7 +76,7 @@ export function eventDomain(domain: string, options: DomainOptions): TopicDefini
   const retentionMs = options.retentionMs ?? RETENTION.SEVEN_DAYS;
 
   const main: TopicDefinition = {
-    name: `events.${domain}`,
+    name: eventTopic(domain),
     partitions,
     replicationFactor: 3,
     description: options.description,
@@ -84,7 +90,7 @@ export function eventDomain(domain: string, options: DomainOptions): TopicDefini
   };
 
   const retries: TopicDefinition[] = RETRY_TIERS.map((tier) => ({
-    name: `retry.${domain}.${tier.suffix}`,
+    name: retryTopic(domain, tier.suffix),
     partitions: retryPartitions,
     replicationFactor: 3,
     description: `Retry tier ${tier.suffix} for events.${domain}`,
@@ -96,7 +102,7 @@ export function eventDomain(domain: string, options: DomainOptions): TopicDefini
   }));
 
   const dlq: TopicDefinition = {
-    name: `dlq.${domain}`,
+    name: dlqTopic(domain),
     partitions: retryPartitions,
     replicationFactor: 3,
     description: `Dead letter queue for events.${domain} — retries exhausted or permanent failure`,

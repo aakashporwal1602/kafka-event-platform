@@ -1,0 +1,30 @@
+{
+  "name": "@platform/domain",
+  "version": "0.5.0",
+  "private": true,
+  "type": "module",
+  "description": "The event contract: envelope, event-type grammar, idempotency keys, topic naming, repository interfaces",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "rm -rf dist *.tsbuildinfo"
+  },
+  "dependencies": {
+    "@platform/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.5",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.3"
+  }
+}

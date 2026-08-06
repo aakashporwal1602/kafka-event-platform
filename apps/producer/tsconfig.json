@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "types": ["node"]
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["dist", "node_modules", "src/**/*.test.ts"],
+  "references": [
+    { "path": "../../packages/core" },
+    { "path": "../../packages/domain" },
+    { "path": "../../packages/kafka" },
+    { "path": "../../packages/persistence" }
+  ]
+}

@@ -56,9 +56,55 @@ jobs:
       - name: Unit tests
         run: pnpm test
 
+  # Real Postgres and Redis via Testcontainers. Separate from `verify` because
+  # it is an order of magnitude slower and because a container failure should
+  # be distinguishable at a glance from a lint failure — the two have nothing
+  # to do with each other and merging them makes a red cross uninformative.
+  #
+  # GitHub's ubuntu runners ship with Docker, so no service containers or
+  # setup action are needed; Testcontainers talks to the host daemon directly.
+  integration:
+    name: Integration tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Pre-pull rather than letting the first test pay for it. Image pulls on
+      # a cold runner take longer than the tests do, and a pull that overruns
+      # the hook timeout fails as "container did not start" — which reads like
+      # a bug in the test rather than a slow network.
+      - name: Pre-pull images
+        run: |
+          docker pull postgres:16-alpine
+          docker pull redis:7-alpine
+          docker pull confluentinc/cp-kafka:7.7.1
+
+      - name: Integration tests
+        run: pnpm test:integration
+        env:
+          # Skip the Ryuk reaper container. Testcontainers normally starts it to
+          # clean up if the process is killed; on an ephemeral CI runner the
+          # whole VM is discarded anyway, and Ryuk is a common source of
+          # startup flakiness in sandboxed Docker environments.
+          TESTCONTAINERS_RYUK_DISABLED: 'true'
+
   # Validates the Docker Compose stack parses and that topic provisioning is
-  # internally consistent. Full integration tests against live containers are
-  # added in Chapter 15.
+  # internally consistent.
   infra:
     name: Infrastructure
     runs-on: ubuntu-latest

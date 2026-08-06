@@ -2,17 +2,17 @@
 
 > Updated at the end of every chapter. Progress is measured in completed chapters, not lines of code.
 
-**Current version:** `v0.3.0` · **Progress:** 3 / 18 chapters (16.7%) · **Current phase:** Foundations
+**Current version:** `v0.5.0` · **Progress:** 5 / 18 chapters (27.8%) · **Current phase:** Publish path
 
 ```
-Part I   Foundations        ███████████████░░░░░  3/4
-Part II  Publish path       ░░░░░░░░░░░░░░░░░░░░  0/3
+Part I   Foundations        ████████████████████  4/4
+Part II  Publish path       ███████░░░░░░░░░░░░░  1/3
 Part III Consume path       ░░░░░░░░░░░░░░░░░░░░  0/2
 Part IV  Failure handling   ░░░░░░░░░░░░░░░░░░░░  0/2
 Part V   Advanced patterns  ░░░░░░░░░░░░░░░░░░░░  0/4
 Part VI  Production         ░░░░░░░░░░░░░░░░░░░░  0/3
 ─────────────────────────────────────────────────────
-Overall                     ███░░░░░░░░░░░░░░░░░  3/18  (16.7%)
+Overall                     ██████░░░░░░░░░░░░░░  5/18  (27.8%)
 ```
 
 ---
@@ -24,8 +24,8 @@ Overall                     ███░░░░░░░░░░░░░░�
 | **0** | **Architecture & Design Decisions** | `v0.1.0`  | ✅ **Complete** | —        | 4       |
 | **1** | **Infrastructure Foundation**       | `v0.2.0`  | ✅ **Complete** | Phase 1a | 3       |
 | **2** | **Shared Core Library**             | `v0.3.0`  | ✅ **Complete** | —        | 9       |
-| 3     | Data Layer (Postgres + Redis)       | `v0.4.0`  | ⬜ Not started  | —        | —       |
-| 4     | Producer Service                    | `v0.5.0`  | ⬜ Not started  | Phase 1b | —       |
+| **3** | **Data Layer (Postgres + Redis)**   | `v0.4.0`  | ✅ **Complete** | —        | 13      |
+| **4** | **Producer Service**                | `v0.5.0`  | ✅ **Complete** | Phase 1b | 9       |
 | 5     | Gateway Service & Public APIs       | `v0.6.0`  | ⬜ Not started  | Phase 2  | —       |
 | 6     | Schema Registry                     | `v0.7.0`  | ⬜ Not started  | Phase 3  | —       |
 | 7     | Consumer Runtime                    | `v0.8.0`  | ⬜ Not started  | —        | —       |
@@ -68,7 +68,7 @@ Tracks the requirements in [the HLD](./hld/01-system-architecture.md#2-requireme
 
 | Requirement                             | Delivered by  | Status |
 | --------------------------------------- | ------------- | ------ |
-| F-1 Publish single/batch                | Ch 4, 5       | ⬜     |
+| F-1 Publish single/batch                | Ch 4, 5       | 🟨     |
 | F-2 Schema registration & evolution     | Ch 6          | ⬜     |
 | F-3 Schema validation on publish        | Ch 4, 6       | ⬜     |
 | F-4 At-least-once + exactly-once effect | Ch 7, 8       | ⬜     |
@@ -112,5 +112,7 @@ Shortcut: `pnpm verify` runs the first four. Branch and PR conventions are in
 | `v0.1.0` | 0       | Project initialisation, architecture and ADRs                    |
 | `v0.2.0` | 1       | 3-broker KRaft cluster, declarative topics, cluster verification |
 | `v0.3.0` | 2       | Result, errors, DI, clock, context, config, logger, lifecycle    |
+| `v0.4.0` | 3       | Schema, migrations, pool, Redis, fencing locks, Unit of Work     |
+| `v0.5.0` | 4       | Event envelope, idempotent producer, outbox relay                |
 
 Target: **`v1.0.0`** at Chapter 17 — production-ready release.

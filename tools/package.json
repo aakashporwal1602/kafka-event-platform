@@ -3,7 +3,7 @@
   "version": "0.2.0",
   "private": true,
   "type": "module",
-  "description": "Operational tooling — topic provisioning, cluster verification, codegen",
+  "description": "Operational tooling \u2014 topic provisioning, cluster verification, codegen",
   "scripts": {
     "topics:bootstrap": "tsx bootstrap-topics.ts",
     "topics:plan": "tsx bootstrap-topics.ts --dry-run --prune",
@@ -11,6 +11,7 @@
     "build": "tsc -b"
   },
   "dependencies": {
+    "@platform/domain": "workspace:*",
     "kafkajs": "^2.2.4"
   },
   "devDependencies": {

@@ -5,5 +5,12 @@
   //
   // Every new package/app adds a reference here.
   "files": [],
-  "references": [{ "path": "./packages/core" }, { "path": "./tools" }]
+  "references": [
+    { "path": "./apps/producer" },
+    { "path": "./packages/core" },
+    { "path": "./packages/domain" },
+    { "path": "./packages/kafka" },
+    { "path": "./packages/persistence" },
+    { "path": "./tools" }
+  ]
 }

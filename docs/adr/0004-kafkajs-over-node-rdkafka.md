@@ -3,6 +3,7 @@
 - **Status:** Accepted
 - **Date:** 2026-08-02
 - **Deciders:** Platform Engineering
+- **Amended by:** [ADR-0013](0013-idempotent-producer-settings.md) — compression is **gzip**, not lz4: KafkaJS ships only gzip built in, and adding an lz4 codec reintroduces the install friction this ADR chose KafkaJS to avoid
 
 ## Context
 

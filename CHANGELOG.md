@@ -14,6 +14,134 @@ _Nothing yet._
 
 ---
 
+## [0.5.0] — 2026-08-03
+
+**Chapter 4 — Producer Service**
+
+### Added
+
+- **`@platform/domain`** — the event contract, with one dependency
+  (`@platform/core`) and no knowledge of any driver. That constraint is what
+  lets the retry engine, DLQ and replay service operate on envelopes and be
+  written once
+  - **Event envelope** separating metadata from payload, mirrored into Kafka
+    headers so a DLQ message stays triageable when its payload is exactly what
+    cannot be parsed
+  - **Two timestamps** — `occurredAt` (the fact) and `recordedAt` (the record).
+    They differ by days when a mobile client syncs late, and a system with one
+    field has to choose which question it answers wrongly
+  - **Event-type grammar** enforced by regex. Past tense, because an event is a
+    fact that cannot be refused and an imperative name invites a consumer to
+    treat it as a command it may decline
+  - **Idempotency keys** derived from business meaning, length-prefixed before
+    hashing. A separator-joined key makes `("agg b", "c")` and `("agg", "b c")`
+    collide, silently dropping one of two distinct events
+  - **Topic naming and partition keys** — prefix-first so Kafka ACLs and metric
+    selectors can match; keyed by aggregate because that is the only scope in
+    which Kafka orders anything
+- **`@platform/kafka`** — the only file in the repository that imports
+  `kafkajs`, which is what keeps ADR-0004's reversibility claim true
+  - **Idempotent producer**, `acks=-1`, five in-flight requests. The three are
+    one decision: idempotence is what makes a produce timeout safely retryable,
+    and what makes >1 in flight ordering-safe
+  - **Error translation** on numeric broker codes rather than driver strings.
+    `OutOfOrderSequenceNumber` is fatal, not retryable — only recreating the
+    producer recovers it, and a naive retry loop spins forever
+- **`@platform/producer`** — the outbox relay and the composition root
+  - Publishes **inside** the claiming transaction, because `SKIP LOCKED` works
+    through row locks that are the claim; committing first unlocks unpublished
+    rows for a second relay to republish
+  - Publish then mark, never mark then publish. At-least-once is chosen here,
+    in this ordering, and nowhere else
+  - No leader election: a single relay is a throughput ceiling and a failover
+    gap, and `SKIP LOCKED` already makes N relays safe
+- **ADR-0012** — event envelope and versioning
+- **ADR-0013** — idempotent producer settings, amending ADR-0004
+- **End-to-end integration tests** against real Postgres and Kafka: a committed
+  row becomes a record, a rolled-back transaction produces none, headers
+  survive the round trip
+
+### Changed
+
+- Repository interfaces moved from `@platform/persistence` to
+  `@platform/domain` (ADR-0010). Persistence deliberately does not re-export
+  them — that convenience would let a service depend on the persistence layer
+  to describe a domain concept
+- `tools/topics.config.ts` sources topic names from `@platform/domain` instead
+  of its own copy. Two copies of a naming rule agree until one is edited
+- **ADR-0004 amended**: compression is gzip, not lz4. KafkaJS ships only gzip
+  built in, and an lz4 codec reintroduces the install friction that ADR chose
+  KafkaJS to avoid
+
+---
+
+## [0.4.0] — 2026-08-02
+
+**Chapter 3 — Data Layer (PostgreSQL + Redis)**
+
+### Added
+
+- **`@platform/persistence`** — every line that touches Postgres or Redis, so
+  nothing above this layer imports `pg` or `ioredis`
+  - **Initial schema** — 10 tables, 6 partitions, 19 indexes, 14 CHECK
+    constraints. `timestamptz` throughout (a `timestamp` column silently drops
+    the offset and every duration crossing a DST boundary is wrong), text +
+    CHECK instead of enum types (adding a value to a PG enum cannot be done in
+    a transaction with other DDL), `jsonb` not `json`, partial indexes for the
+    outbox backlog, monthly range partitioning for the append-heavy log tables
+  - **Migration runner** — session-level advisory lock so N pods in a rolling
+    deploy do not race; SHA-256 checksums so editing an applied migration is a
+    named startup failure instead of silent schema divergence across
+    environments; DDL and bookkeeping row commit together, which works only
+    because Postgres has transactional DDL. No down migrations — a rollback
+    that drops a column destroys everything written since the deploy
+  - **Connection pool** — sizing derived from `max_connections` ÷ replicas
+    rather than guessed, `statement_timeout` and
+    `idle_in_transaction_session_timeout` set, SQLSTATE-based error translation
+    that decides retryable vs permanent at the boundary, and a `serializable`
+    helper with bounded retry (SSI aborts at commit, so retry is mandatory —
+    code that omits it loses writes under contention)
+  - **Redis key design** — 6 key families, a TTL on every one, and derived
+    memory arithmetic showing 24h × 10K events/sec exceeds a single node.
+    A test asserts the arithmetic so the comment cannot go stale
+  - **Redis client** — an eleven-command surface. `KEYS` and `FLUSHDB` are
+    absent by construction; `enableOfflineQueue: false` because a buffered lock
+    acquisition that lands seconds late is a correctness bug, not a slow success
+  - **Distributed lock with fencing tokens** — Lua for acquire, release and
+    extend, because Redis executing a script atomically is the only reason
+    check-then-act is safe. Release is compare-and-delete: a bare `DEL` after a
+    lease expiry frees somebody else's lock and turns one slow holder into a
+    cascade
+  - **Repository interfaces + Unit of Work** — repositories are constructed
+    **per transaction** and handed to the callback, so the enlistment mistake
+    (a pool-bound repository committing on its own inside someone else's
+    transaction) has no call site at which it can be written
+  - **Outbox repository** — `FOR UPDATE SKIP LOCKED` claiming, batch insert
+    bounded by Postgres' 65,535-parameter protocol limit, `unnest`-based batch
+    publish marking, and optional relay sharding on `hashtext(aggregate_id)` so
+    events for one aggregate keep their order when N relays drain the table
+- **ADR-0010** — repository pattern over an ORM
+- **ADR-0011** — single-node Redis lock with fencing tokens, not Redlock
+- **`docs/lld/02-data-layer.md`** — module map, the two-guarantees table,
+  relay sequence, fencing failure mode, error-translation table, known limits
+- **Testcontainers integration suite** — `vitest.integration.config.ts` plus
+  real Postgres and Redis. Covers what only a database can prove: `SKIP LOCKED`
+  handing disjoint rows to concurrent claimers, transactional DDL rolling a
+  failed migration back, advisory locks serialising concurrent runners,
+  `SET NX` admitting exactly one of twenty contenders, fencing tokens staying
+  monotonic across a lease expiry
+- **CI `integration` job** — separate from `verify` so a container failure is
+  distinguishable at a glance from a lint failure
+
+### Changed
+
+- `tsconfig.eslint.json` now carries project references, so `@platform/*`
+  imports resolve to source during linting. Without them, linting a clean
+  checkout fails because `dist` does not exist yet and every type-aware rule
+  reports `any` — a failure that appears only in CI and only on the first run
+
+---
+
 ## [0.3.0] — 2026-08-02
 
 **Chapter 2 — Shared Core Library**
